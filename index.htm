@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreLIN — база игровых механик v0.1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== BENTO СТИЛЬ: БИРЮЗОВАЯ ПАЛИТРА ===== */
+        :root {
+            /* БАЗОВЫЕ ЦВЕТА */
+            --color-bg: #f8fafc;           /* Основной фон */
+            --color-surface: #ffffff;      /* Поверхность карточек */
+            --color-text: #1e293b;         /* Основной текст */
+            
+            /* БИРЮЗОВАЯ ГАММА */
+            --color-accent: #0d9488;       /* Основной акцент */
+            --color-accent-dark: #0f766e;  /* Для hover-эффектов */
+            --color-accent-light: #f0fdfa; /* Светлый фон */
+            --color-accent-subtle: #ccfbf1;/* Очень светлый */
+            
+            /* СЕРЫЕ ТОНА */
+            --color-border: #e2e8f0;       /* Границы */
+            --color-text-light: #64748b;   /* Вторичный текст */
+            --color-text-lighter: #94a3b8; /* Третичный текст */
+            --color-text-disabled: #cbd5e1; /* Неактивный текст */
+            
+            /* BENTO РАДИУСЫ */
+            --radius-none: 0;
+            --radius-sm: 6px;      /* 6px для мелких элементов */
+            --radius-md: 12px;     /* 12px для кнопок, инпутов */
+            --radius-lg: 16px;     /* 16px для карточек */
+            --radius-xl: 20px;     /* 20px для особых контейнеров */
+            
+            /* BENTO ТЕНИ */
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.10);
+            --shadow-xl: 0 8px 24px rgba(15, 23, 42, 0.12);
+            --shadow-accent: 0 2px 12px rgba(13, 148, 136, 0.15);
+            
+            /* ПЕРЕХОДЫ */
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* ОТСТУПЫ (8px система) */
+            --spacing-xs: 0.5rem;   /* 8px */
+            --spacing-sm: 0.75rem;  /* 12px */
+            --spacing-md: 1rem;     /* 16px */
+            --spacing-lg: 1.5rem;   /* 24px */
+            --spacing-xl: 2rem;     /* 32px */
+            --spacing-2xl: 3rem;    /* 48px */
+            
+            /* МАКСИМАЛЬНЫЕ ШИРИНЫ */
+            --max-width-sm: 640px;
+            --max-width-md: 768px;
+            --max-width-lg: 1024px;
+            --max-width-xl: 1280px;
+            --max-width-2xl: 1400px;
+        }
+        
+        /* ===== БАЗОВЫЙ СБРОС ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            color: var(--color-text);
+            background: var(--color-bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-weight: 400;
+        }
+        
+        /* ===== BENTO ТИПОГРАФИКА ===== */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        h3 {
+            font-size: 1.375rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        h4 {
+            font-size: 1.125rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        p {
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-light);
+        }
+        
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--color-text-light);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: var(--color-accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            margin-left: var(--spacing-sm);
+            vertical-align: middle;
+            letter-spacing: 0.02em;
+        }
+        
+        /* ===== BENTO ШАПКА ===== */
+        .header {
+            background: var(--color-surface);
+            padding: var(--spacing-lg) var(--spacing-xl);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+        
+        .header-content {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-accent {
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+        
+        .logo-icon {
+            color: var(--color-accent);
+            font-size: 2rem;
+        }
+        
+        /* ===== BENTO НАВИГАЦИЯ ===== */
+        .main-nav {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 0.625rem 1.25rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--color-text);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .nav-btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+        }
+        
+        .nav-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+            font-weight: 600;
+        }
+        
+        /* ===== BENTO НАВИГАЦИЯ СЛОЁВ ===== */
+        .layer-nav-section {
+            background: var(--color-surface);
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 80px;
+            z-index: 900;
+        }
+        
+        .layer-nav {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: var(--spacing-xs);
+        }
+        
+        .layer-btn {
+            padding: 0.625rem 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+        
+        .layer-btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* ===== BENTO ОСНОВНОЙ МАКЕТ ===== */
+        .main-container {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--spacing-xl);
+        }
+        
+        /* ===== BENTO БОКОВАЯ ПАНЕЛЬ ===== */
+        .sidebar {
+            position: sticky;
+            top: 160px;
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+        
+        .bento-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+        }
+        
+        .bento-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .bento-card.accent {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-accent);
+        }
+        
+        .sidebar-section {
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .sidebar-title i {
+            color: var(--color-accent);
+            font-size: 1rem;
+        }
+        
+        /* ===== BENTО ФОРМЫ И ФИЛЬТРЫ ===== */
+        .filter-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .filter-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            font-weight: 400;
+        }
+        
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+        
+        /* ===== BENTO КНОПКИ ===== */
+        .btn {
+            padding: 0.75rem 1rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            width: 100%;
+        }
+        
+        .btn:hover {
+            border-color: var(--color-accent);
+            background: var(--color-accent-light);
+            color: var(--color-accent-dark);
+        }
+        
+        .btn-accent {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+        }
+        
+        /* ===== BENTO КАРТОЧКИ МЕХАНИК ===== */
+        .mechanics-grid {
+            display: grid;
+            gap: var(--spacing-lg);
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+        
+        .mechanic-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .mechanic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-accent);
+        }
+        
+        .mechanic-card.expanded {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .compact-header {
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+        
+        .mechanic-id {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.75rem;
+            color: var(--color-text-lighter);
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        
+        .mechanic-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+        
+        .mechanic-description {
+            color: var(--color-text-light);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .mechanic-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+            align-items: center;
+        }
+        
+        /* ===== BENTO БЭЙДЖИ И ТЕГИ ===== */
+        .layer-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .layer-badge.accent {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+        }
+        
+        .risk-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            border: none;
+        }
+        
+        .risk-low { 
+            background: #10b981;
+            color: white;
+        }
+        .risk-medium { 
+            background: #f59e0b;
+            color: white;
+        }
+        .risk-high { 
+            background: #ef4444;
+            color: white;
+        }
+        
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--color-accent-subtle);
+            color: var(--color-accent-dark);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            border: 1px solid var(--color-accent-light);
+            font-weight: 500;
+        }
+        
+        /* ===== BENTO СТАТИСТИКА ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stat-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            line-height: 1;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--color-text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* ===== BENTO КОНТРОЛЫ СОРТИРОВКИ ===== */
+        .sort-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .sort-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+        
+        .sort-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+        
+        .sort-select:focus {
+            border-color: var(--color-accent);
+            outline: none;
+        }
+        
+        /* ===== BENTO ГЕНЕРАТОР МЕХАНИК ===== */
+        .cube-container {
+            max-width: var(--max-width-xl);
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+        }
+        
+        .cube-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            padding-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .cube-header h1 {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .cube-controls-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: var(--spacing-xl);
+            margin: var(--spacing-2xl) 0;
+        }
+        
+        .cube-control-group {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .cube-control-group.accent {
+            border-color: var(--color-accent);
+        }
+        
+        .cube-result-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cube-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .cube-roll-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--color-accent);
+            color: white;
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+            letter-spacing: -0.01em;
+        }
+        
+        .cube-roll-btn:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-accent);
+        }
+        
+        .cube-roll-btn i {
+            font-size: 1.5rem;
+        }
+        
+        .cube-animation {
+            text-align: center;
+            font-size: 4rem;
+            margin: var(--spacing-xl) 0;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cube-dice {
+            display: inline-block;
+            animation: roll 1s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--color-accent);
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .cube-mechanic-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border-left: 3px solid var(--color-accent);
+            border: 1px solid var(--color-border);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .cube-mechanic-card:hover {
+            transform: translateX(4px);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* ===== BENTO ПАГИНАЦИЯ ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-width: 40px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+        
+        .page-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+        
+        /* ===== BENTO ИКОНКИ ===== */
+        .icon-accent {
+            color: var(--color-accent);
+        }
+        
+        .icon-large {
+            font-size: 1.5rem;
+        }
+        
+        /* ===== АВТОРСТВО BENTO ===== */
+        .bento-credit {
+            display: inline-block;
+            margin-left: var(--spacing-sm);
+            font-size: 0.75rem;
+            color: var(--color-text-lighter);
+            font-weight: 400;
+        }
+        
+        .bento-credit a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .bento-credit a:hover {
+            text-decoration: underline;
+        }
+        
+        /* ===== МОБИЛЬНАЯ ВЕРСИЯ BENTO ===== */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+                padding-bottom: var(--spacing-xl);
+                margin-bottom: var(--spacing-xl);
+            }
+            
+            .cube-controls-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .layer-nav {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--spacing-md);
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                text-align: center;
+            }
+            
+            .main-nav {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .layer-nav-section {
+                padding: var(--spacing-sm) var(--spacing-md);
+                top: 120px;
+            }
+            
+            .main-container {
+                padding: var(--spacing-md);
+            }
+            
+            .cube-container {
+                padding: var(--spacing-md);
+            }
+            
+            .cube-header h1 {
+                font-size: 2rem;
+            }
+            
+            .mechanics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .layer-nav {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .cube-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .sort-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--spacing-sm);
+            }
+            
+            .mechanic-name {
+                font-size: 1.125rem;
+            }
+        }
+        
+        /* ===== УТИЛИТЫ BENTO ===== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-1 { margin-bottom: var(--spacing-md); }
+        .mb-2 { margin-bottom: var(--spacing-lg); }
+        .mb-3 { margin-bottom: var(--spacing-xl); }
+        .mt-1 { margin-top: var(--spacing-md); }
+        .mt-2 { margin-top: var(--spacing-lg); }
+        .mt-3 { margin-top: var(--spacing-xl); }
+        
+        /* Иконка развертывания */
+        .expand-icon {
+            position: absolute;
+            right: var(--spacing-lg);
+            top: var(--spacing-lg);
+            transition: transform 0.2s;
+            color: var(--color-accent);
+            font-size: 1rem;
+        }
+        
+        .mechanic-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Анимация пульсации */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Скрытый контент для скринридеров */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Загрузка */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-accent);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            z-index: 9999;
+            box-shadow: var(--shadow-lg);
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузка -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div style="color: var(--color-text-light); font-weight: 500;">Загрузка базы механик...</div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notificationContainer"></div>
+
+    <!-- BENTO ШАПКА -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showMainPage()">
+                <i class="logo-icon fas fa-cubes"></i>
+                <span>C<span class="logo-accent">ore</span>LIN</span>
+                <span class="version-badge">v0.1</span>
+                <span class="bento-credit">
+                     <a href="https://t.me/eduletyago" target="_blank">t.me/eduletyago</a>
+                </span>
+            </a>
+            
+            <nav class="main-nav" id="mainNav">
+                <button class="nav-btn active" onclick="showMainPage()">
+                    <i class="fas fa-database icon-accent"></i> База механик
+                </button>
+                <button class="nav-btn" onclick="showCubePage()">
+                    <i class="fas fa-dice icon-accent"></i> Генератор
+                </button>
+                <button class="nav-btn" onclick="showBookmarks()">
+                    <i class="fas fa-bookmark icon-accent"></i> Закладки
+                </button>
+                <button class="nav-btn" onclick="refreshDatabase()">
+                    <i class="fas fa-sync-alt icon-accent"></i> Обновить
+                </button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- BENTO НАВИГАЦИЯ СЛОЁВ -->
+    <section class="layer-nav-section">
+        <div class="layer-nav">
+            <button class="layer-btn" onclick="filterByLayer('core_loop')">
+                <i class="fas fa-redo-alt"></i> Core Loop
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('progression')">
+                <i class="fas fa-chart-line"></i> Progression
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('economy')">
+                <i class="fas fa-coins"></i> Economy
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('time')">
+                <i class="fas fa-clock"></i> Time
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('uncertainty')">
+                <i class="fas fa-dice"></i> Uncertainty
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('information')">
+                <i class="fas fa-info-circle"></i> Information
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('space')">
+                <i class="fas fa-expand-arrows-alt"></i> Space
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('social')">
+                <i class="fas fa-users"></i> Social
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('psychology')">
+                <i class="fas fa-brain"></i> Psychology
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('restriction')">
+                <i class="fas fa-lock"></i> Restriction
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('onboarding')">
+                <i class="fas fa-graduation-cap"></i> Onboarding
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('meta')">
+                <i class="fas fa-infinity"></i> Meta
+            </button>
+        </div>
+    </section>
+    
+    <!-- BENTO ОСНОВНОЙ КОНТЕНТ -->
+    <main>
+        <!-- ГЛАВНАЯ СТРАНИЦА -->
+        <div id="mainPage">
+            <div class="main-container">
+                <!-- BENTO БОКОВАЯ ПАНЕЛЬ -->
+                <aside class="sidebar">
+                    <div class="bento-card sidebar-section accent">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-filter icon-accent"></i> Фильтры
+                        </h3>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Слой механики</label>
+                            <select class="filter-select" id="layerFilter" onchange="applyFilters()">
+                                <option value="">Все слои</option>
+                                <option value="core_loop">Core Loop</option>
+                                <option value="progression">Progression</option>
+                                <option value="economy">Economy</option>
+                                <option value="time">Time</option>
+                                <option value="uncertainty">Uncertainty</option>
+                                <option value="information">Information</option>
+                                <option value="space">Space</option>
+                                <option value="social">Social</option>
+                                <option value="psychology">Psychology</option>
+                                <option value="restriction">Restriction</option>
+                                <option value="onboarding">Onboarding</option>
+                                <option value="meta">Meta</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Уровень риска</label>
+                            <select class="filter-select" id="riskFilter" onchange="applyFilters()">
+                                <option value="">Все уровни</option>
+                                <option value="low">Низкий</option>
+                                <option value="medium">Средний</option>
+                                <option value="high">Высокий</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Поиск по названию</label>
+                            <input type="text" class="filter-input" id="searchInput" placeholder="Введите запрос..." oninput="applyFilters()">
+                        </div>
+                        
+                        <button class="btn btn-accent" onclick="saveCurrentFilter()">
+                            <i class="fas fa-save"></i> Сохранить фильтр
+                        </button>
+                    </div>
+                    
+                    <!-- СОХРАНЁННЫЕ ФИЛЬТРЫ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-folder"></i> Сохранённые фильтры
+                        </h3>
+                        <div class="saved-filters" id="savedFiltersList">
+                            <!-- Динамическое заполнение -->
+                        </div>
+                    </div>
+                    
+                    <!-- ЗАКЛАДКИ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-bookmark"></i> Закладки
+                        </h3>
+                        <div class="bookmarks-list" id="bookmarksList">
+                            <!-- Динамическое заполнение -->
+                        </div>
+                    </div>
+
+                    <!-- СТАТУС БАЗЫ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-database"></i> Статус базы
+                        </h3>
+                        <div id="databaseStatus">
+                            <div style="font-size: 0.875rem; color: var(--color-text-light);">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="color: var(--color-text); font-weight: 500;">Механик:</span>
+                                    <span id="statusTotalCount" style="float: right; font-weight: 600; color: var(--color-accent);">0</span>
+                                </div>
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="color: var(--color-text); font-weight: 500;">Файлов:</span>
+                                    <span id="statusFileCount" style="float: right; font-weight: 600;">0/12</span>
+                                </div>
+                                <div>
+                                    <span style="color: var(--color-text); font-weight: 500;">Обновлено:</span>
+                                    <span id="statusUpdated" style="float: right; font-size: 0.75rem; color: var(--color-text-lighter);">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- BENTO ОСНОВНОЙ КОНТЕНТ -->
+                <div class="content">
+                    <!-- BENTO СТАТИСТИКА -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalCount">0</div>
+                            <div class="stat-label">Всего механик</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="filteredCount">0</div>
+                            <div class="stat-label">Найдено</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="bookmarkCount">0</div>
+                            <div class="stat-label">В закладках</div>
+                        </div>
+                    </div>
+                    
+                    <!-- BENTO КОНТРОЛЫ СОРТИРОВКИ -->
+                    <div class="sort-controls">
+                        <span class="sort-label">Сортировка:</span>
+                        <select class="sort-select" id="sortBy" onchange="applySorting()">
+                            <option value="default">По умолчанию</option>
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                            <option value="risk_asc">По риску (низкий → высокий)</option>
+                            <option value="risk_desc">По риску (высокий → низкий)</option>
+                            <option value="layer_asc">По слою (А-Я)</option>
+                        </select>
+                        <button class="btn btn-accent" onclick="exportDatabase()" style="width: auto; padding: 0.5rem 1rem;">
+                            <i class="fas fa-download"></i> Экспорт
+                        </button>
+                    </div>
+                    
+                    <!-- BENTO СЕТКА МЕХАНИК -->
+                    <div class="mechanics-grid" id="mechanicsGrid">
+                        <!-- Динамическое заполнение -->
+                    </div>
+                    
+                    <!-- BENTO ПАГИНАЦИЯ -->
+                    <div class="pagination" id="paginationContainer" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- СТРАНИЦА ГЕНЕРАТОРА -->
+        <div id="cubePage" class="hidden">
+            <div class="cube-container">
+                <div class="cube-header">
+                    <h1>Генератор механик</h1>
+                    <p class="subtitle">Случайные комбинации для дизайна игр и систем</p>
+                </div>
+                
+                <div class="cube-controls-container">
+                    <!-- BENTO НАСТРОЙКИ -->
+                    <div class="cube-controls">
+                        <div class="bento-card cube-control-group accent">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-sliders-h icon-accent"></i> Настройки генерации
+                            </h3>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Режим выборки</label>
+                                <select class="filter-select" id="cubeMode">
+                                    <option value="single">Одиночная механика</option>
+                                    <option value="pair">Пара механик</option>
+                                    <option value="triple">Три механики</option>
+                                    <option value="combo">Комбинация (2-5)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Слой механики</label>
+                                <select class="filter-select" id="cubeLayerFilter">
+                                    <option value="">Все слои</option>
+                                    <option value="core_loop">Core Loop</option>
+                                    <option value="progression">Progression</option>
+                                    <option value="economy">Economy</option>
+                                    <option value="time">Time</option>
+                                    <option value="uncertainty">Uncertainty</option>
+                                    <option value="information">Information</option>
+                                    <option value="space">Space</option>
+                                    <option value="social">Social</option>
+                                    <option value="psychology">Psychology</option>
+                                    <option value="restriction">Restriction</option>
+                                    <option value="onboarding">Onboarding</option>
+                                    <option value="meta">Meta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Уровень риска</label>
+                                <select class="filter-select" id="cubeRiskFilter">
+                                    <option value="">Любой риск</option>
+                                    <option value="low">Низкий</option>
+                                    <option value="medium">Средний</option>
+                                    <option value="high">Высокий</option>
+                                </select>
+                            </div>
+                            
+                            <button class="cube-roll-btn pulse" onclick="rollCube()">
+                                <i class="fas fa-dice"></i>
+                                <span>СГЕНЕРИРОВАТЬ</span>
+                            </button>
+                        </div>
+                        
+                        <div class="bento-card cube-control-group">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-chart-bar"></i> Статистика
+                            </h3>
+                            <div id="cubeFilterStats" class="mt-2">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-border);">
+                                    <span>Доступно механик:</span>
+                                    <span id="cubeAvailableCount" style="font-weight: 600; color: var(--color-accent);">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Всего в базе:</span>
+                                    <span style="font-weight: 600;" id="cubeTotalCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- BENTO РЕЗУЛЬТАТ -->
+                    <div class="bento-card cube-result-container">
+                        <div class="cube-result-header">
+                            <h3><i class="fas fa-bolt icon-accent"></i> Результат</h3>
+                            <div id="cubeResultCounter" style="font-weight: 600; color: var(--color-accent);"></div>
+                        </div>
+                        
+                        <div class="cube-result-content" id="cubeResultContent">
+                            <div class="cube-result-empty">
+                                <div class="cube-animation">
+                                    <div class="cube-dice"><i class="fas fa-dice"></i></div>
+                                </div>
+                                <h3>Готов к генерации</h3>
+                                <p style="margin-top: 0.5rem; color: var(--color-text-light);">Настройте параметры и нажмите "Сгенерировать"</p>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons" id="cubeActionButtons" style="display: none; margin-top: var(--spacing-xl); gap: var(--spacing-md);">
+                            <button class="btn" onclick="saveCubeResultToBookmarks()">
+                                <i class="fas fa-bookmark"></i> Сохранить
+                            </button>
+                            <button class="btn btn-accent" onclick="createDesignChallenge()">
+                                <i class="fas fa-lightbulb"></i> Задача
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BENTO ИСТОРИЯ -->
+                <div class="bento-card cube-control-group mt-3">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-history"></i> История генераций
+                    </h3>
+                    <div id="cubeHistory" class="mt-2">
+                        <p style="text-align: center; padding: 1rem; color: var(--color-text-lighter); font-weight: 500;">
+                            История генераций появится здесь
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- СТРАНИЦА ЗАКЛАДОК -->
+        <div id="bookmarksPage" class="hidden">
+            <div class="main-container">
+                <div class="content">
+                    <div class="content-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+                        <h2><i class="fas fa-bookmark icon-accent"></i> Закладки</h2>
+                        <button class="btn" onclick="clearBookmarks()" style="width: auto;">
+                            <i class="fas fa-trash"></i> Очистить все
+                        </button>
+                    </div>
+                    
+                    <div class="sort-controls">
+                        <span class="sort-label">Сортировка:</span>
+                        <select class="sort-select" id="bookmarksSortBy" onchange="renderBookmarksPage()">
+                            <option value="default">По дате</option>
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                            <option value="risk_asc">По риску</option>
+                            <option value="layer_asc">По слою</option>
+                        </select>
+                    </div>
+                    
+                    <div id="bookmarksContent" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ===== КОНФИГУРАЦИЯ =====
+        const JSON_FILES = [
+            'CORE_LOOP.json',
+            'PROGRESSION.json',
+            'ECONOMY.json',
+            'TIME.json',
+            'UNCERTAINTY.json',
+            'INFORMATION.json',
+            'SPACE.json',
+            'SOCIAL.json',
+            'PSYCHOLOGY.json',
+            'RESTRICTIONS.json',
+            'ONBOARDING.json',
+            'META.json'
+        ];
+
+        const RISK_MAPPING = {
+            'низкий': ['green', 'низкий', 'low'],
+            'средний': ['yellow', 'средний', 'medium'],
+            'высокий': ['red', 'высокий', 'high']
+        };
+
+        const LAYER_NAMES = {
+            'core_loop': 'Core Loop',
+            'progression': 'Progression',
+            'economy': 'Economy',
+            'time': 'Time',
+            'uncertainty': 'Uncertainty',
+            'information': 'Information',
+            'space': 'Space',
+            'social': 'Social',
+            'psychology': 'Psychology',
+            'restriction': 'Restriction',
+            'onboarding': 'Onboarding',
+            'meta': 'Meta'
+        };
+
+        const LAYER_ICONS = {
+            'core_loop': 'fa-redo-alt',
+            'progression': 'fa-chart-line',
+            'economy': 'fa-coins',
+            'time': 'fa-clock',
+            'uncertainty': 'fa-dice',
+            'information': 'fa-info-circle',
+            'space': 'fa-expand-arrows-alt',
+            'social': 'fa-users',
+            'psychology': 'fa-brain',
+            'restriction': 'fa-lock',
+            'onboarding': 'fa-graduation-cap',
+            'meta': 'fa-infinity'
+        };
+
+        // ===== ГОСУДАРСТВО =====
+        let mechanicsDatabase = [];
+        let filteredMechanics = [];
+        let bookmarks = JSON.parse(localStorage.getItem('corelin_bookmarks') || '[]');
+        let savedFilters = JSON.parse(localStorage.getItem('corelin_filters') || '[]');
+        let cubeHistory = JSON.parse(localStorage.getItem('corelin_history') || '[]');
+        let lastCubeResult = null;
+        let expandedCardId = null;
+        let currentSort = 'default';
+        let currentPage = 1;
+        const pageSize = 15;
+        let loadedFiles = 0;
+        let totalFilesToLoad = JSON_FILES.length;
+
+        // ===== УТИЛИТЫ =====
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            container.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
+        }
+
+        function updateDatabaseStatus() {
+            document.getElementById('statusTotalCount').textContent = mechanicsDatabase.length;
+            document.getElementById('statusFileCount').textContent = `${loadedFiles}/${totalFilesToLoad}`;
+            document.getElementById('statusUpdated').textContent = new Date().toLocaleTimeString('ru-RU');
+        }
+
+        // ===== ЗАГРУЗКА БАЗЫ ДАННЫХ =====
+        async function loadMechanicsDatabase() {
+            showLoading(true);
+            mechanicsDatabase = [];
+            filteredMechanics = [];
+            loadedFiles = 0;
+            
+            const loadingPromises = JSON_FILES.map(async (file) => {
+                try {
+                    const response = await fetch(file);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const mechanics = await response.json();
+                    loadedFiles++;
+                    
+                    // Валидация и нормализация данных
+                    const normalizedMechanics = mechanics.map(mechanic => ({
+                        ...mechanic,
+                        // Нормализуем risk_color
+                        risk_color: normalizeRiskColor(mechanic.risk_color),
+                        // Нормализуем layer
+                        layer: mechanic.layer?.toLowerCase().replace(/ /g, '_') || 'unknown'
+                    }));
+                    
+                    return normalizedMechanics;
+                } catch (error) {
+                    console.warn(`Не удалось загрузить ${file}:`, error);
+                    loadedFiles++;
+                    return [];
+                }
+            });
+
+            try {
+                const results = await Promise.allSettled(loadingPromises);
+                
+                // Собираем все механики
+                results.forEach(result => {
+                    if (result.status === 'fulfilled' && result.value.length > 0) {
+                        mechanicsDatabase.push(...result.value);
+                    }
+                });
+
+                // Проверяем, что данные загружены
+                if (mechanicsDatabase.length === 0) {
+                    throw new Error('Не удалось загрузить ни одной механики');
+                }
+
+                // Убираем дубликаты по ID
+                mechanicsDatabase = mechanicsDatabase.filter((mechanic, index, self) =>
+                    index === self.findIndex(m => m.id === mechanic.id)
+                );
+
+                filteredMechanics = [...mechanicsDatabase];
+                
+                showNotification(`Загружено ${mechanicsDatabase.length} механик из ${loadedFiles} файлов`, 'info');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки базы данных:', error);
+                showNotification('Ошибка загрузки базы данных. Используются тестовые данные.', 'error');
+                loadFallbackData();
+            } finally {
+                updateDatabaseStatus();
+                applySorting();
+                updateStats();
+                showLoading(false);
+            }
+        }
+
+        function normalizeRiskColor(riskColor) {
+            if (!riskColor) return 'medium';
+            
+            const risk = riskColor.toLowerCase();
+            if (RISK_MAPPING['низкий'].includes(risk)) return 'low';
+            if (RISK_MAPPING['средний'].includes(risk)) return 'medium';
+            if (RISK_MAPPING['высокий'].includes(risk)) return 'high';
+            return 'medium';
+        }
+
+        function loadFallbackData() {
+            // Минимальный набор тестовых данных
+            mechanicsDatabase = [
+                {
+                    "id": "action_feedback",
+                    "name": "Действие с мгновенным фидбеком",
+                    "layer": "core_loop",
+                    "description": "Любое действие игрока немедленно вызывает ощутимую, предсказуемую реакцию системы.",
+                    "tags": ["фундаментальная", "интерактивность", "отклик"],
+                    "interaction_type": ["физическое", "ментальное"],
+                    "motivation": { 
+                        "type": "внутренняя", 
+                        "notes": "Удовлетворяет базовую потребность в агентности и контроле." 
+                    },
+                    "game_examples": [
+                        {
+                            "title": "Super Mario",
+                            "implementation": "Нажатие кнопки прыжка → мгновенный прыжок персонажа"
+                        }
+                    ],
+                    "product_examples": [
+                        "Кнопка 'Отправить' в мессенджере показывает анимацию отправки"
+                    ],
+                    "education_examples": [
+                        "Нажатие на интерактивный элемент вызывает немедленный отклик"
+                    ],
+                    "abuse_risks": [
+                        "Злоупотребление ярким фидбеком может вызывать зависимость"
+                    ],
+                    "ethical_constraints": [
+                        "Фидбек должен быть правдивым и не вводить в заблуждение"
+                    ],
+                    "toxicity_level": "низкий",
+                    "risk_color": "low",
+                    "scaling_risk": "При высокой нагрузке задержка разрушает иллюзию мгновенности",
+                    "related_mechanics": ["повторяемое_действие"]
+                }
+            ];
+            filteredMechanics = [...mechanicsDatabase];
+        }
+
+        // ===== ОБНОВЛЕНИЕ БАЗЫ =====
+        async function refreshDatabase() {
+            showNotification('Обновление базы данных...', 'info');
+            await loadMechanicsDatabase();
+        }
+
+        // ===== НАВИГАЦИЯ =====
+        function showMainPage() {
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('cubePage').classList.add('hidden');
+            document.getElementById('bookmarksPage').classList.add('hidden');
+            updateNavButtons('main');
+            applySorting();
+        }
+
+        function showCubePage() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('cubePage').classList.remove('hidden');
+            document.getElementById('bookmarksPage').classList.add('hidden');
+            updateNavButtons('cube');
+            updateCubeFilterStats();
+        }
+
+        function showBookmarks() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('cubePage').classList.add('hidden');
+            document.getElementById('bookmarksPage').classList.remove('hidden');
+            updateNavButtons('bookmarks');
+            renderBookmarksPage();
+        }
+
+        function updateNavButtons(active) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (active === 'main') document.querySelectorAll('.nav-btn')[0].classList.add('active');
+            if (active === 'cube') document.querySelectorAll('.nav-btn')[1].classList.add('active');
+            if (active === 'bookmarks') document.querySelectorAll('.nav-btn')[2].classList.add('active');
+        }
+
+        // ===== ФИЛЬТРАЦИЯ =====
+        function applyFilters() {
+            const layer = document.getElementById('layerFilter').value;
+            const risk = document.getElementById('riskFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredMechanics = mechanicsDatabase.filter(mechanic => {
+                // Фильтр по слою
+                if (layer && mechanic.layer !== layer) return false;
+                
+                // Фильтр по риску
+                if (risk) {
+                    const riskValue = mechanic.risk_color?.toLowerCase();
+                    if (!RISK_MAPPING[risk]?.includes(riskValue)) return false;
+                }
+                
+                // Поиск
+                if (search && !(
+                    mechanic.name.toLowerCase().includes(search) ||
+                    mechanic.description.toLowerCase().includes(search) ||
+                    (mechanic.tags && mechanic.tags.some(tag => tag.toLowerCase().includes(search)))
+                )) return false;
+                
+                return true;
+            });
+            
+            expandedCardId = null;
+            currentPage = 1;
+            applySorting();
+        }
+
+        function filterByLayer(layer) {
+            document.getElementById('layerFilter').value = layer;
+            applyFilters();
+        }
+
+        // ===== СОРТИРОВКА =====
+        function applySorting() {
+            currentSort = document.getElementById('sortBy').value;
+            
+            if (currentSort !== 'default') {
+                filteredMechanics.sort((a, b) => {
+                    switch(currentSort) {
+                        case 'name_asc':
+                            return a.name.localeCompare(b.name);
+                        case 'name_desc':
+                            return b.name.localeCompare(a.name);
+                        case 'risk_asc':
+                            const riskOrder = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrder[a.risk_color] || 1) - (riskOrder[b.risk_color] || 1);
+                        case 'risk_desc':
+                            const riskOrderDesc = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrderDesc[b.risk_color] || 1) - (riskOrderDesc[a.risk_color] || 1);
+                        case 'layer_asc':
+                            return (LAYER_NAMES[a.layer] || '').localeCompare(LAYER_NAMES[b.layer] || '');
+                        default:
+                            return 0;
+                    }
+                });
+            }
+            
+            renderMechanics();
+            updateStats();
+        }
+
+        // ===== ОТОБРАЖЕНИЕ МЕХАНИК =====
+        function renderMechanics() {
+            const grid = document.getElementById('mechanicsGrid');
+            
+            if (filteredMechanics.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);">
+                        <h3 style="color: var(--color-text-light); margin-bottom: 1rem;">Механики не найдены</h3>
+                        <p style="color: var(--color-text-lighter);">Попробуйте изменить параметры фильтрации</p>
+                    </div>
+                `;
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+            
+            // Пагинация
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredMechanics.length);
+            const pageMechanics = filteredMechanics.slice(startIndex, endIndex);
+            
+            grid.innerHTML = '';
+            pageMechanics.forEach(mechanic => {
+                const isBookmarked = bookmarks.includes(mechanic.id);
+                const isExpanded = expandedCardId === mechanic.id;
+                
+                const card = document.createElement('div');
+                card.className = `mechanic-card ${isExpanded ? 'expanded' : ''} fade-in`;
+                card.setAttribute('data-id', mechanic.id);
+                card.innerHTML = createCardContent(mechanic, isBookmarked, isExpanded);
+                
+                card.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    toggleCard(mechanic.id);
+                });
+                
+                grid.appendChild(card);
+            });
+            
+            renderPagination();
+        }
+
+        function createCardContent(mechanic, isBookmarked, isExpanded) {
+            const layerName = LAYER_NAMES[mechanic.layer] || mechanic.layer;
+            const layerIcon = LAYER_ICONS[mechanic.layer] || 'fa-question';
+            
+            return `
+                <div class="compact-header">
+                    <div style="position: relative; padding-right: 3rem;">
+                        <div class="mechanic-id">${mechanic.id}</div>
+                        <div class="mechanic-name">${mechanic.name}</div>
+                        <div class="mechanic-description">
+                            ${mechanic.description}
+                        </div>
+                        <div class="mechanic-meta">
+                            <span class="layer-badge">
+                                <i class="fas ${layerIcon}"></i> ${layerName}
+                            </span>
+                            <span class="risk-badge risk-${mechanic.risk_color}">
+                                ${mechanic.risk_color === 'high' ? '⚠️ ' : ''}${getRiskText(mechanic.risk_color)}
+                            </span>
+                            ${isBookmarked ? '<span style="color: var(--color-accent);"><i class="fas fa-bookmark"></i></span>' : ''}
+                            ${mechanic.tags ? mechanic.tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                        </div>
+                        <div class="expand-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                </div>
+                
+                <div class="detailed-content">
+                    ${isExpanded ? renderDetailedContent(mechanic, isBookmarked) : ''}
+                </div>
+            `;
+        }
+
+        function getRiskText(riskColor) {
+            switch(riskColor) {
+                case 'low': return 'Низкий';
+                case 'medium': return 'Средний';
+                case 'high': return 'Высокий';
+                default: return 'Средний';
+            }
+        }
+
+        function renderDetailedContent(mechanic, isBookmarked) {
+            return `
+                <div style="padding: var(--spacing-lg); padding-top: 0;">
+                    <div style="margin: var(--spacing-lg) 0;">
+                        <h4 style="color: var(--color-accent); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <i class="fas fa-bolt"></i> Мотивация
+                        </h4>
+                        <div><strong>Тип:</strong> ${mechanic.motivation?.type || 'Не указан'}</div>
+                        <div style="margin-top: var(--spacing-sm); padding: var(--spacing-sm); background: var(--color-accent-light); border-radius: var(--radius-md);">
+                            ${mechanic.motivation?.notes || 'Нет описания мотивации'}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin: var(--spacing-lg) 0;">
+                        ${mechanic.game_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h5 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                                <i class="fas fa-gamepad"></i> В играх
+                            </h5>
+                            ${Array.isArray(mechanic.game_examples) ? mechanic.game_examples.map(ex => `
+                                <div style="margin-bottom: var(--spacing-md);">
+                                    <div style="font-weight: 600; color: var(--color-text);">${ex.title || 'Пример'}</div>
+                                    <div style="font-size: 0.9rem; color: var(--color-text-light); margin-top: 0.25rem;">${ex.implementation || ex.details || ''}</div>
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light);">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                        
+                        ${mechanic.product_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h5 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                                <i class="fas fa-mobile-alt"></i> В продуктах
+                            </h5>
+                            ${Array.isArray(mechanic.product_examples) ? mechanic.product_examples.map(ex => `
+                                <div style="margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--color-text-light); padding-left: 1rem; position: relative;">
+                                    <div style="position: absolute; left: 0; color: var(--color-accent);">•</div> ${ex}
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light);">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                        
+                        ${mechanic.education_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h5 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                                <i class="fas fa-graduation-cap"></i> В образовании
+                            </h5>
+                            ${Array.isArray(mechanic.education_examples) ? mechanic.education_examples.map(ex => `
+                                <div style="margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--color-text-light); padding-left: 1rem; position: relative;">
+                                    <div style="position: absolute; left: 0; color: var(--color-accent);">•</div> ${ex}
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light);">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${mechanic.abuse_risks && mechanic.abuse_risks.length > 0 ? `
+                    <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background: var(--color-accent-light); border-left: 3px solid var(--color-accent); border-radius: var(--radius-md);">
+                        <h5 style="color: var(--color-accent-dark); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <i class="fas fa-exclamation-triangle"></i> Риски злоупотребления
+                        </h5>
+                        <ul style="padding-left: var(--spacing-lg);">
+                            ${mechanic.abuse_risks.map(risk => `<li style="margin-bottom: 0.5rem; color: var(--color-text-light);">${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);">
+                        <h5 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <i class="fas fa-balance-scale"></i> Анализ
+                        </h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+                            <div>
+                                <div><strong>Уровень токсичности:</strong></div>
+                                <div style="font-weight: 600; color: ${mechanic.toxicity_level === 'high' ? 'var(--color-accent)' : 'var(--color-text)'}">
+                                    ${mechanic.toxicity_level === 'high' ? '🔴 Высокий' : mechanic.toxicity_level === 'medium' ? '🟡 Средний' : '🟢 Низкий'}
+                                </div>
+                            </div>
+                            <div>
+                                <div><strong>Риск масштабирования:</strong></div>
+                                <div style="font-size: 0.9rem; color: var(--color-text-light);">${mechanic.scaling_risk || 'Не указан'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
+                        <button class="btn" onclick="event.stopPropagation(); toggleBookmark('${mechanic.id}')" style="flex: 1;">
+                            <i class="fas ${isBookmarked ? 'fa-bookmark' : 'fa-bookmark'}"></i>
+                            ${isBookmarked ? 'Удалить из закладок' : 'Добавить в закладки'}
+                        </button>
+                        <button class="btn btn-accent" onclick="event.stopPropagation(); copyMechanicToClipboard('${mechanic.id}')" style="flex: 1;">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCard(mechanicId) {
+            if (expandedCardId === mechanicId) {
+                expandedCardId = null;
+            } else {
+                expandedCardId = mechanicId;
+            }
+            renderMechanics();
+        }
+
+        // ===== СТАТИСТИКА =====
+        function updateStats() {
+            document.getElementById('totalCount').textContent = mechanicsDatabase.length;
+            document.getElementById('filteredCount').textContent = filteredMechanics.length;
+            document.getElementById('bookmarkCount').textContent = bookmarks.length;
+        }
+
+        // ===== ГЕНЕРАТОР =====
+        function updateCubeFilterStats() {
+            const filtered = getFilteredMechanicsForCube();
+            document.getElementById('cubeAvailableCount').textContent = filtered.length;
+            document.getElementById('cubeTotalCount').textContent = mechanicsDatabase.length;
+        }
+
+        function getFilteredMechanicsForCube() {
+            const layerFilter = document.getElementById('cubeLayerFilter').value;
+            const riskFilter = document.getElementById('cubeRiskFilter').value;
+            
+            return mechanicsDatabase.filter(mechanic => {
+                if (layerFilter && mechanic.layer !== layerFilter) return false;
+                if (riskFilter) {
+                    const riskValue = mechanic.risk_color?.toLowerCase();
+                    if (!RISK_MAPPING[riskFilter]?.includes(riskValue)) return false;
+                }
+                return true;
+            });
+        }
+
+        function rollCube() {
+            const mode = document.getElementById('cubeMode').value;
+            const availableMechanics = getFilteredMechanicsForCube();
+            
+            if (availableMechanics.length === 0) {
+                showCubeResult([], 'empty');
+                return;
+            }
+            
+            // Анимация
+            const animation = document.querySelector('.cube-animation');
+            animation.innerHTML = '<div class="cube-dice"><i class="fas fa-dice"></i></div>';
+            
+            // Выбор механик
+            let count = 0;
+            switch(mode) {
+                case 'single': count = 1; break;
+                case 'pair': count = 2; break;
+                case 'triple': count = 3; break;
+                case 'combo': count = 2 + Math.floor(Math.random() * 4); break;
+            }
+            
+            count = Math.min(count, availableMechanics.length);
+            const shuffled = [...availableMechanics].sort(() => Math.random() - 0.5);
+            const selectedMechanics = shuffled.slice(0, count);
+            
+            lastCubeResult = {
+                mechanics: selectedMechanics,
+                timestamp: new Date().toISOString(),
+                filters: {
+                    layer: document.getElementById('cubeLayerFilter').value,
+                    risk: document.getElementById('cubeRiskFilter').value,
+                    mode: mode
+                }
+            };
+            
+            cubeHistory.unshift({
+                mechanics: selectedMechanics.map(m => ({id: m.id, name: m.name})),
+                timestamp: lastCubeResult.timestamp
+            });
+            
+            cubeHistory = cubeHistory.slice(0, 10);
+            localStorage.setItem('corelin_history', JSON.stringify(cubeHistory));
+            
+            setTimeout(() => {
+                showCubeResult(selectedMechanics, 'success');
+                updateCubeHistory();
+            }, 800);
+        }
+
+        function showCubeResult(mechanics, status) {
+            const content = document.getElementById('cubeResultContent');
+            const actions = document.getElementById('cubeActionButtons');
+            const counter = document.getElementById('cubeResultCounter');
+            
+            if (status === 'empty') {
+                content.innerHTML = `
+                    <div class="cube-result-empty">
+                        <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-accent);">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3>Нет доступных механик</h3>
+                        <p style="margin-top: 0.5rem; color: var(--color-text-light);">Измените настройки фильтров</p>
+                    </div>
+                `;
+                actions.style.display = 'none';
+                counter.textContent = '';
+                return;
+            }
+            
+            if (mechanics.length === 0) {
+                content.innerHTML = `
+                    <div class="cube-result-empty">
+                        <div class="cube-animation">
+                            <div class="cube-dice"><i class="fas fa-dice"></i></div>
+                        </div>
+                        <h3>Готов к генерации</h3>
+                        <p style="margin-top: 0.5rem; color: var(--color-text-light);">Настройте параметры и нажмите "Сгенерировать"</p>
+                    </div>
+                `;
+                actions.style.display = 'none';
+                counter.textContent = '';
+                return;
+            }
+            
+            const resultHTML = mechanics.map(mechanic => `
+                <div class="cube-mechanic-card" onclick="event.stopPropagation(); showMainPage(); searchMechanic('${mechanic.id}')">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 1.125rem; font-weight: 600; color: var(--color-accent); margin-bottom: 0.25rem;">
+                                ${mechanic.name}
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--color-text-light);">
+                                ${mechanic.description.substring(0, 100)}${mechanic.description.length > 100 ? '...' : ''}
+                            </div>
+                        </div>
+                        <span class="risk-badge risk-${mechanic.risk_color}" style="margin-left: 1rem;">
+                            ${getRiskText(mechanic.risk_color)}
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 0.75rem; align-items: center;">
+                        <span class="layer-badge" style="background: var(--color-accent-light); color: var(--color-accent-dark);">
+                            ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+                        </span>
+                        <div style="display: flex; gap: 0.25rem;">
+                            ${mechanic.tags ? mechanic.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            content.innerHTML = resultHTML;
+            actions.style.display = 'flex';
+            counter.textContent = `Выбрано: ${mechanics.length}`;
+        }
+
+        // ===== ЗАКЛАДКИ =====
+        function toggleBookmark(id) {
+            const index = bookmarks.indexOf(id);
+            if (index === -1) {
+                bookmarks.push(id);
+                showNotification('Добавлено в закладки', 'info');
+            } else {
+                bookmarks.splice(index, 1);
+                showNotification('Удалено из закладок', 'info');
+            }
+            localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+            renderMechanics();
+            updateBookmarksList();
+        }
+
+        function updateBookmarksList() {
+            const list = document.getElementById('bookmarksList');
+            list.innerHTML = '';
+            
+            const bookmarkMechanics = bookmarks
+                .map(id => mechanicsDatabase.find(m => m.id === id))
+                .filter(m => m)
+                .slice(0, 5);
+            
+            bookmarkMechanics.forEach(mechanic => {
+                const item = document.createElement('div');
+                item.className = 'saved-filter-item';
+                item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 0.5rem; cursor: pointer; transition: all var(--transition-fast);';
+                item.innerHTML = `
+                    <span style="font-weight: 500; color: var(--color-text);">${mechanic.name}</span>
+                    <button onclick="event.stopPropagation(); toggleBookmark('${mechanic.id}')" style="background: none; border: none; color: var(--color-accent); cursor: pointer; font-size: 1rem; padding: 0.25rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                item.addEventListener('click', () => {
+                    showMainPage();
+                    searchMechanic(mechanic.id);
+                });
+                list.appendChild(item);
+            });
+            
+            document.getElementById('bookmarkCount').textContent = bookmarks.length;
+        }
+
+        // ===== ПАГИНАЦИЯ =====
+        function renderPagination() {
+            const container = document.getElementById('paginationContainer');
+            const totalPages = Math.ceil(filteredMechanics.length / pageSize);
+            
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            
+            // Кнопка "Назад"
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderMechanics();
+                }
+            };
+            container.appendChild(prevBtn);
+            
+            // Страницы
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderMechanics();
+                };
+                container.appendChild(pageBtn);
+            }
+            
+            // Кнопка "Вперед"
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderMechanics();
+                }
+            };
+            container.appendChild(nextBtn);
+        }
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Инициализация CoreLIN v0.1');
+            await loadMechanicsDatabase();
+        });
+
+        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+        function searchMechanic(id) {
+            const mechanic = mechanicsDatabase.find(m => m.id === id);
+            if (!mechanic) return;
+            
+            document.getElementById('layerFilter').value = mechanic.layer;
+            
+            // Определяем риск для фильтра
+            let riskFilter = '';
+            if (RISK_MAPPING['низкий'].includes(mechanic.risk_color?.toLowerCase())) riskFilter = 'low';
+            else if (RISK_MAPPING['средний'].includes(mechanic.risk_color?.toLowerCase())) riskFilter = 'medium';
+            else if (RISK_MAPPING['высокий'].includes(mechanic.risk_color?.toLowerCase())) riskFilter = 'high';
+            
+            document.getElementById('riskFilter').value = riskFilter;
+            document.getElementById('searchInput').value = mechanic.name;
+            
+            applyFilters();
+            
+            setTimeout(() => {
+                toggleCard(id);
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        function copyMechanicToClipboard(id) {
+            const mechanic = mechanicsDatabase.find(m => m.id === id);
+            if (!mechanic) return;
+            
+            const text = `
+${mechanic.name.toUpperCase()}
+${'='.repeat(mechanic.name.length)}
+
+ID: ${mechanic.id}
+Слой: ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+Риск: ${getRiskText(mechanic.risk_color)}
+Токсичность: ${mechanic.toxicity_level || 'Не указана'}
+
+📝 ОПИСАНИЕ:
+${mechanic.description}
+
+🎯 МОТИВАЦИЯ:
+${mechanic.motivation?.notes || 'Нет описания'}
+
+🎮 ПРИМЕРЫ В ИГРАХ:
+${mechanic.game_examples ? mechanic.game_examples.map(ex => `• ${ex.title || 'Пример'}: ${ex.implementation || ex.details || ''}`).join('\n') : 'Не указаны'}
+
+⚠️ РИСКИ ЗЛОУПОТРЕБЛЕНИЯ:
+${mechanic.abuse_risks ? mechanic.abuse_risks.map(risk => `• ${risk}`).join('\n') : 'Не указаны'}
+            `.trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Механика скопирована в буфер обмена!', 'info');
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                showNotification('Не удалось скопировать', 'error');
+            });
+        }
+
+        function saveCurrentFilter() {
+            const name = prompt('Введите название для фильтра:');
+            if (!name) return;
+            
+            const filter = {
+                name: name,
+                layer: document.getElementById('layerFilter').value,
+                risk: document.getElementById('riskFilter').value,
+                search: document.getElementById('searchInput').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            savedFilters.unshift(filter);
+            localStorage.setItem('corelin_filters', JSON.stringify(savedFilters));
+            updateSavedFiltersList();
+            showNotification(`Фильтр "${name}" сохранен!`, 'info');
+        }
+
+        function updateSavedFiltersList() {
+            const list = document.getElementById('savedFiltersList');
+            list.innerHTML = '';
+            
+            savedFilters.slice(0, 3).forEach((filter, index) => {
+                const item = document.createElement('div');
+                item.className = 'saved-filter-item';
+                item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 0.5rem; cursor: pointer; transition: all var(--transition-fast);';
+                item.innerHTML = `
+                    <span style="font-weight: 500; color: var(--color-text);">${filter.name}</span>
+                    <span style="font-size: 0.8rem; color: var(--color-text-lighter);">
+                        ${new Date(filter.timestamp).toLocaleDateString('ru-RU')}
+                    </span>
+                `;
+                
+                item.addEventListener('click', () => {
+                    loadFilter(index);
+                });
+                
+                list.appendChild(item);
+            });
+        }
+
+        function loadFilter(index) {
+            if (index >= 0 && index < savedFilters.length) {
+                const filter = savedFilters[index];
+                document.getElementById('layerFilter').value = filter.layer;
+                document.getElementById('riskFilter').value = filter.risk;
+                document.getElementById('searchInput').value = filter.search || '';
+                applyFilters();
+                
+                document.querySelector('.content').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function renderBookmarksPage() {
+            const container = document.getElementById('bookmarksContent');
+            
+            if (bookmarks.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);">
+                        <h3 style="color: var(--color-text-light); margin-bottom: 1rem;">Закладок пока нет</h3>
+                        <p style="color: var(--color-text-lighter);">Добавляйте механики в закладки, нажимая на кнопку "Добавить в закладки"</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const bookmarkMechanics = bookmarks
+                .map(id => mechanicsDatabase.find(m => m.id === id))
+                .filter(m => m);
+            
+            const sortBy = document.getElementById('bookmarksSortBy').value;
+            
+            if (sortBy !== 'default') {
+                bookmarkMechanics.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'name_asc': return a.name.localeCompare(b.name);
+                        case 'name_desc': return b.name.localeCompare(a.name);
+                        case 'risk_asc': 
+                            const riskOrder = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrder[a.risk_color] || 1) - (riskOrder[b.risk_color] || 1);
+                        case 'layer_asc':
+                            return (LAYER_NAMES[a.layer] || '').localeCompare(LAYER_NAMES[b.layer] || '');
+                        default: return 0;
+                    }
+                });
+            }
+            
+            container.innerHTML = '';
+            bookmarkMechanics.forEach(mechanic => {
+                const card = document.createElement('div');
+                card.className = 'mechanic-card compact';
+                card.style.cssText = 'margin-bottom: var(--spacing-md); cursor: pointer;';
+                card.innerHTML = `
+                    <div class="compact-header">
+                        <div class="mechanic-id">${mechanic.id}</div>
+                        <div class="mechanic-name">${mechanic.name}</div>
+                        <div style="color: var(--color-text-light); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                            ${mechanic.description.substring(0, 100)}${mechanic.description.length > 100 ? '...' : ''}
+                        </div>
+                        <div class="mechanic-meta">
+                            <span class="layer-badge" style="background: var(--color-accent-light); color: var(--color-accent-dark);">
+                                ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+                            </span>
+                            <span class="risk-badge risk-${mechanic.risk_color}">
+                                ${getRiskText(mechanic.risk_color)}
+                            </span>
+                            <span style="color: var(--color-accent);"><i class="fas fa-bookmark"></i></span>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    showMainPage();
+                    searchMechanic(mechanic.id);
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function clearBookmarks() {
+            if (confirm('Очистить все закладки? Все сохраненные механики будут удалены.')) {
+                bookmarks = [];
+                localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+                updateBookmarksList();
+                renderBookmarksPage();
+                showNotification('Все закладки очищены', 'info');
+            }
+        }
+
+        function saveCubeResultToBookmarks() {
+            if (!lastCubeResult || !lastCubeResult.mechanics) {
+                showNotification('Сначала сгенерируйте механику!', 'warning');
+                return;
+            }
+            
+            let added = 0;
+            lastCubeResult.mechanics.forEach(mechanic => {
+                if (!bookmarks.includes(mechanic.id)) {
+                    bookmarks.push(mechanic.id);
+                    added++;
+                }
+            });
+            
+            localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarksList();
+            
+            if (added > 0) {
+                showNotification(`Добавлено ${added} механик в закладки!`, 'info');
+            } else {
+                showNotification('Все эти механики уже были в закладках', 'info');
+            }
+        }
+
+        function createDesignChallenge() {
+            if (!lastCubeResult || !lastCubeResult.mechanics) {
+                showNotification('Сначала сгенерируйте механику!', 'warning');
+                return;
+            }
+            
+            const mechanics = lastCubeResult.mechanics;
+            const names = mechanics.map(m => m.name);
+            
+            const challenge = `
+🎯 ДИЗАЙН-ЧЕЛЛЕНДЖ CORE LIN
+=============================
+
+📋 СГЕНЕРИРОВАННЫЕ МЕХАНИКИ:
+${names.map((name, i) => `${i+1}. "${name}"`).join('\n')}
+
+📊 ПАРАМЕТРЫ:
+• Количество: ${mechanics.length} механик
+• Сложность: ${mechanics.length === 1 ? 'Базовый' : mechanics.length <= 2 ? 'Средний' : 'Продвинутый'}
+
+🎯 ЗАДАНИЕ:
+Спроектируйте систему, которая интегрирует все выпавшие механики в единую работающую систему.
+
+📝 ТРЕБОВАНИЯ:
+1. Опишите core loop системы
+2. Покажите взаимодействие механик
+3. Продумайте баланс
+4. Укажите потенциальные риски
+5. Предложите 2 варианта применения
+
+⏱ ВРЕМЯ: ${mechanics.length * 25} минут
+
+✨ УДАЧИ!
+            `.trim();
+            
+            navigator.clipboard.writeText(challenge).then(() => {
+                showNotification('Задача скопирована в буфер обмена!', 'info');
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                showNotification('Не удалось скопировать задачу', 'error');
+            });
+        }
+
+        function updateCubeHistory() {
+            const historyContainer = document.getElementById('cubeHistory');
+            
+            if (cubeHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <p style="text-align: center; padding: 1rem; color: var(--color-text-lighter); font-weight: 500;">
+                        История генераций пуста
+                    </p>
+                `;
+                return;
+            }
+            
+            const historyHTML = cubeHistory.slice(0, 5).map((record, index) => {
+                const date = new Date(record.timestamp);
+                const timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+                
+                return `
+                    <div style="padding: 0.75rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 500; color: var(--color-text);">${record.mechanics.map(m => m.name).join(', ')}</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-lighter);">${timeStr}</div>
+                        </div>
+                        <button onclick="event.stopPropagation(); loadCubeHistory(${index})" style="background: var(--color-accent); color: white; border: none; padding: 0.25rem 0.75rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.8rem; font-weight: 500;">
+                            Повторить
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            historyContainer.innerHTML = `
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${historyHTML}
+                </div>
+            `;
+        }
+
+        function loadCubeHistory(index) {
+            if (index >= 0 && index < cubeHistory.length) {
+                const record = cubeHistory[index];
+                const mechanics = record.mechanics.map(m => 
+                    mechanicsDatabase.find(mech => mech.id === m.id)
+                ).filter(m => m);
+                
+                lastCubeResult = {
+                    mechanics: mechanics,
+                    timestamp: record.timestamp,
+                    filters: {}
+                };
+                
+                showCubeResult(mechanics, 'success');
+                showNotification('Результат загружен из истории', 'info');
+            }
+        }
+
+        function exportDatabase() {
+            const data = {
+                mechanics: mechanicsDatabase,
+                bookmarks: bookmarks,
+                savedFilters: savedFilters,
+                cubeHistory: cubeHistory,
+                exportDate: new Date().toISOString(),
+                version: 'CoreLIN v0.1'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `corelin_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('База данных экспортирована', 'info');
+        }
+    </script>
+</body>
+</html>
