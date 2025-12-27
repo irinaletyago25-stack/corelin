@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoreLIN — база игровых механик v0.3 с Умной Песочницей</title>
+    <title>CoreLIN — база игровых механик v0.1 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1499,7 +1499,7 @@
             <a href="#" class="logo" onclick="showMainPage()">
                 <i class="logo-icon fas fa-cubes"></i>
                 <span>C<span class="logo-accent">ore</span>LIN</span>
-                <span class="version-badge">v0.3</span>
+                <span class="version-badge">v0.1</span>
             </a>
             
             <nav class="main-nav" id="mainNav">
@@ -1513,7 +1513,7 @@
                     <i class="fas fa-bookmark icon-accent"></i> Закладки
                 </button>
                 <button class="nav-btn" onclick="showSandbox()">
-                    <i class="fas fa-shapes icon-accent"></i> Умная песочница
+                    <i class="fas fa-shapes icon-accent"></i> Песочница
                 </button>
                 <a href="https://t.me/eduletyago" target="_blank" class="nav-btn author-link">
                     <i class="fab fa-telegram icon-accent"></i> Автор
@@ -1842,7 +1842,7 @@
         <div id="sandboxPage" class="hidden">
             <div class="sandbox-container">
                 <div class="sandbox-header">
-                    <h1><i class="fas fa-shapes icon-accent"></i> Умная песочница механик v0.3</h1>
+                    <h1><i class="fas fa-shapes icon-accent"></i> Песочница механик</h1>
                     <p class="subtitle">Собирайте систему и сразу видите анализ. Каждое действие — мгновенная обратная связь!</p>
                 </div>
                 
@@ -1891,7 +1891,7 @@
                                 <h3>Начните создавать систему</h3>
                                 <p>Перетащите механики из библиотеки слева</p>
                                 <p style="font-size: 0.875rem; margin-top: 0.5rem; color: var(--color-accent);">
-                                    <i class="fas fa-lightbulb"></i> Система будет анализировать каждое ваше действие!
+                                    <i class="fas fa-lightbulb"></i> Система анализирует каждое ваше действие, но, пожалуйста, принимайте решения самостоятельно!
                                 </p>
                             </div>
                         </div>
@@ -3642,7 +3642,7 @@
                     timestamp: new Date().toISOString()
                 },
                 exportDate: new Date().toISOString(),
-                exportedFrom: 'CoreLIN Smart Sandbox v0.3'
+                exportedFrom: 'CoreLIN Smart Sandbox v0.1'
             };
             
             const blob = new Blob([JSON.stringify(system, null, 2)], { type: 'application/json' });
@@ -3901,7 +3901,7 @@ ${names.map((name, i) => `${i+1}. "${name}"`).join('\n')}
                     connections: sandboxConnections
                 },
                 exportDate: new Date().toISOString(),
-                version: 'CoreLIN v0.3 с Умной Песочницей'
+                version: 'CoreLIN v0.1 с Умной Песочницей'
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -3920,7 +3920,7 @@ ${names.map((name, i) => `${i+1}. "${name}"`).join('\n')}
 
         // ===== ИНИЦИАЛИЗАЦИЯ =====
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Инициализация CoreLIN v0.3 с Умной Песочницей');
+            console.log('Инициализация CoreLIN v0.1 с Умной Песочницей');
             
             // Загружаем данные
             await loadMechanicsDatabase();
@@ -3932,7 +3932,7 @@ ${names.map((name, i) => `${i+1}. "${name}"`).join('\n')}
             updateCubeFilterStats();
             updateCubeHistory();
             
-            showNotification('CoreLIN v0.3 загружен! Используйте "Умную песочницу" для анализа механик', 'info');
+            showNotification('CoreLIN v0.1 загружен! Используйте "Умную песочницу" для анализа совместимости механик', 'info');
         });
     </script>
 </body>
