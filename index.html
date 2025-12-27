@@ -1,0 +1,3939 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreLIN — база игровых механик v0.3 с Умной Песочницей</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== BENTO СТИЛЬ: БИРЮЗОВАЯ ПАЛИТРА ===== */
+        :root {
+            /* БАЗОВЫЕ ЦВЕТА */
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-text: #1e293b;
+            
+            /* БИРЮЗОВАЯ ГАММА */
+            --color-accent: #0d9488;
+            --color-accent-dark: #0f766e;
+            --color-accent-light: #f0fdfa;
+            --color-accent-subtle: #ccfbf1;
+            
+            /* ЦВЕТА ДЛЯ АНАЛИЗА ПЕСОЧНИЦЫ */
+            --color-safe: #10b981;
+            --color-safe-bg: #d1fae5;
+            --color-warning: #f59e0b;
+            --color-warning-bg: #fef3c7;
+            --color-danger: #ef4444;
+            --color-danger-bg: #fee2e2;
+            --color-synergy: #8b5cf6;
+            --color-synergy-bg: #ede9fe;
+            --color-neutral: #94a3b8;
+            --color-neutral-bg: #f1f5f9;
+            
+            /* СЕРЫЕ ТОНА */
+            --color-border: #e2e8f0;
+            --color-text-light: #64748b;
+            --color-text-lighter: #94a3b8;
+            --color-text-disabled: #cbd5e1;
+            
+            /* BENTO РАДИУСЫ */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+            
+            /* BENTO ТЕНИ */
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.10);
+            --shadow-xl: 0 8px 24px rgba(15, 23, 42, 0.12);
+            --shadow-accent: 0 2px 12px rgba(13, 148, 136, 0.15);
+            
+            /* ПЕРЕХОДЫ */
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* ОТСТУПЫ */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.25rem;
+            --spacing-xl: 1.5rem;
+            --spacing-2xl: 2rem;
+            
+            /* МАКСИМАЛЬНЫЕ ШИРИНЫ */
+            --max-width-sm: 640px;
+            --max-width-md: 768px;
+            --max-width-lg: 1024px;
+            --max-width-xl: 1280px;
+            --max-width-2xl: 1400px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            color: var(--color-text);
+            background: var(--color-bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-weight: 400;
+            font-size: 14px;
+        }
+        
+        /* ===== ТИПОГРАФИКА ===== */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+        
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        h4 {
+            font-size: 1.125rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        h5 {
+            font-size: 1rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        h6 {
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        p {
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-light);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: var(--color-text-light);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: var(--color-accent);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            margin-left: var(--spacing-sm);
+            vertical-align: middle;
+            letter-spacing: 0.02em;
+        }
+        
+        /* ===== ШАПКА ===== */
+        .header {
+            background: var(--color-surface);
+            padding: var(--spacing-md) var(--spacing-xl);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+        
+        .header-content {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-accent {
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+        
+        .logo-icon {
+            color: var(--color-accent);
+            font-size: 1.75rem;
+        }
+        
+        /* ===== НАВИГАЦИЯ ===== */
+        .main-nav {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--color-text);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .nav-btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+        }
+        
+        .nav-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+            font-weight: 600;
+        }
+        
+        /* ===== НАВИГАЦИЯ СЛОЁВ ===== */
+        .layer-nav-section {
+            background: var(--color-surface);
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 68px;
+            z-index: 900;
+        }
+        
+        .layer-nav-header {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .layer-nav {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: var(--spacing-xs);
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .layer-nav.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .layer-btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+        
+        .layer-btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .toggle-layers-btn {
+            background: none;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 0.375rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .toggle-layers-btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+        }
+        
+        /* ===== ОСНОВНОЙ МАКЕТ ===== */
+        .main-container {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: var(--spacing-xl);
+        }
+        
+        /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+        .sidebar {
+            position: sticky;
+            top: 148px;
+            height: calc(100vh - 168px);
+            overflow-y: auto;
+        }
+        
+        .bento-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+        }
+        
+        .bento-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .bento-card.accent {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-accent);
+        }
+        
+        .sidebar-section {
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .sidebar-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .sidebar-title i {
+            color: var(--color-accent);
+            font-size: 0.9375rem;
+        }
+        
+        /* ===== ФОРМЫ И ФИЛЬТРЫ ===== */
+        .filter-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .filter-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--color-text-light);
+            margin-bottom: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            font-weight: 400;
+        }
+        
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+        
+        /* ===== КНОПКИ ===== */
+        .btn {
+            padding: 0.625rem 0.875rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: auto;
+            min-width: 100px;
+        }
+        
+        .btn:hover {
+            border-color: var(--color-accent);
+            background: var(--color-accent-light);
+            color: var(--color-accent-dark);
+        }
+        
+        .btn-accent {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+        }
+        
+        /* ===== КАРТОЧКИ МЕХАНИК ===== */
+        .mechanics-grid {
+            display: grid;
+            gap: var(--spacing-lg);
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+        
+        .mechanic-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .mechanic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-accent);
+        }
+        
+        .mechanic-card.expanded {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .compact-header {
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+        
+        .mechanic-id {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.75rem;
+            color: var(--color-text-lighter);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        
+        .mechanic-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.3;
+        }
+        
+        .mechanic-description {
+            color: var(--color-text-light);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .mechanic-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: var(--spacing-md);
+            align-items: center;
+        }
+        
+        /* ===== БЭЙДЖИ И ТЕГИ ===== */
+        .layer-badge {
+            padding: 0.375rem 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .layer-badge.accent {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent-dark);
+        }
+        
+        .risk-badge {
+            padding: 0.375rem 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            border: none;
+        }
+        
+        .risk-low { 
+            background: #10b981;
+            color: white;
+        }
+        .risk-medium { 
+            background: #f59e0b;
+            color: white;
+        }
+        .risk-high { 
+            background: #ef4444;
+            color: white;
+        }
+        
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--color-accent-subtle);
+            color: var(--color-accent-dark);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            border: 1px solid var(--color-accent-light);
+            font-weight: 500;
+        }
+        
+        /* ===== СТАТИСТИКА ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stat-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8125rem;
+            color: var(--color-text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* ===== КОНТРОЛЫ СОРТИРОВКИ ===== */
+        .sort-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .sort-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+        
+        .sort-select {
+            padding: 0.5rem 0.875rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+        
+        .sort-select:focus {
+            border-color: var(--color-accent);
+            outline: none;
+        }
+        
+        /* ===== ГЕНЕРАТОР МЕХАНИК ===== */
+        .cube-container {
+            max-width: var(--max-width-xl);
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+        }
+        
+        .cube-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            padding-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .cube-header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .cube-controls-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-xl);
+            margin: var(--spacing-2xl) 0;
+        }
+        
+        .cube-control-group {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .cube-control-group.accent {
+            border-color: var(--color-accent);
+        }
+        
+        .cube-result-container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cube-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .cube-roll-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--color-accent);
+            color: white;
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .cube-roll-btn:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-accent);
+        }
+        
+        .cube-roll-btn i {
+            font-size: 1.25rem;
+        }
+        
+        .cube-animation {
+            text-align: center;
+            font-size: 3rem;
+            margin: var(--spacing-xl) 0;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cube-dice {
+            display: inline-block;
+            animation: roll 1s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--color-accent);
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .cube-mechanic-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border-left: 3px solid var(--color-accent);
+            border: 1px solid var(--color-border);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .cube-mechanic-card:hover {
+            transform: translateX(4px);
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        /* ===== ПАГИНАЦИЯ ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-width: 36px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+        
+        .page-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+        
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn.disabled:hover {
+            border-color: var(--color-border);
+            color: var(--color-text);
+        }
+        
+        /* ===== СТИЛИ ПЕСОЧНИЦЫ (НОВАЯ ВЕРСИЯ) ===== */
+        .sandbox-container {
+            max-width: var(--max-width-2xl);
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+        
+        .sandbox-header {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .sandbox-header h1 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sandbox-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: var(--spacing-lg);
+            height: calc(100vh - 250px);
+            min-height: 600px;
+        }
+        
+        .sandbox-library {
+            overflow-y: auto;
+        }
+        
+        .sandbox-canvas-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sandbox-canvas {
+            flex: 1;
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            border: 2px dashed var(--color-border);
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        
+        .sandbox-canvas.drag-over {
+            border-color: var(--color-accent);
+            background: var(--color-accent-light);
+        }
+        
+        .empty-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--color-text-lighter);
+        }
+        
+        /* ===== УЗЛЫ НА ХОЛСТЕ ===== */
+        .sandbox-node {
+            position: absolute;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 3px solid var(--color-neutral);
+            padding: 0.75rem 1rem;
+            min-width: 160px;
+            max-width: 200px;
+            cursor: move;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            user-select: none;
+            z-index: 10;
+        }
+        
+        .sandbox-node:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Цветовые состояния узлов на основе анализа */
+        .node-safe {
+            border-color: var(--color-safe);
+            background: var(--color-safe-bg);
+        }
+        
+        .node-warning {
+            border-color: var(--color-warning);
+            background: var(--color-warning-bg);
+        }
+        
+        .node-danger {
+            border-color: var(--color-danger);
+            background: var(--color-danger-bg);
+            animation: pulse-red 2s infinite;
+        }
+        
+        .node-synergy {
+            border-color: var(--color-synergy);
+            background: var(--color-synergy-bg);
+            animation: glow-purple 3s infinite;
+        }
+        
+        .sandbox-node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sandbox-node-name {
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 0.875rem;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .sandbox-node-remove {
+            background: none;
+            border: none;
+            color: var(--color-text-lighter);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0.125rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .sandbox-node-remove:hover {
+            color: var(--color-danger);
+        }
+        
+        .sandbox-node-meta {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .node-badge {
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 500;
+        }
+        
+        /* ===== СВЯЗИ ===== */
+        .connection-strong {
+            stroke: var(--color-safe);
+            stroke-width: 4px;
+            stroke-dasharray: none;
+        }
+        
+        .connection-weak {
+            stroke: var(--color-neutral);
+            stroke-width: 1px;
+            stroke-dasharray: 5,5;
+        }
+        
+        .connection-conflict {
+            stroke: var(--color-danger);
+            stroke-width: 3px;
+            stroke-dasharray: 10,5;
+            animation: pulse-red 1s infinite;
+        }
+        
+        .connection-synergy {
+            stroke: var(--color-synergy);
+            stroke-width: 3px;
+            stroke-dasharray: none;
+            animation: flow 1s linear infinite;
+        }
+        
+        @keyframes flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 10; }
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes glow-purple {
+            0%, 100% { box-shadow: var(--shadow-md); }
+            50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+        }
+        
+        /* ===== ПАНЕЛЬ СОВЕТОВ ===== */
+        .sandbox-advice {
+            overflow-y: auto;
+        }
+        
+        .advice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .advice-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            padding: 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--color-text-light);
+        }
+        
+        .live-advice-panel {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .live-advice-panel h4 {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .advice-items {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .advice-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--color-neutral);
+            background: var(--color-neutral-bg);
+            font-size: 0.8125rem;
+            line-height: 1.4;
+        }
+        
+        .advice-item.positive {
+            border-left-color: var(--color-safe);
+            background: var(--color-safe-bg);
+        }
+        
+        .advice-item.warning {
+            border-left-color: var(--color-warning);
+            background: var(--color-warning-bg);
+        }
+        
+        .advice-item.danger {
+            border-left-color: var(--color-danger);
+            background: var(--color-danger-bg);
+        }
+        
+        .advice-item.suggestion {
+            border-left-color: var(--color-synergy);
+            background: var(--color-synergy-bg);
+        }
+        
+        .advice-item i {
+            margin-right: 0.5rem;
+        }
+        
+        .canvas-tools {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+        
+        /* ===== УВЕДОМЛЕНИЯ ===== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-accent);
+            color: white;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            z-index: 9999;
+            box-shadow: var(--shadow-lg);
+            font-weight: 500;
+            font-size: 0.875rem;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: var(--color-danger);
+        }
+        
+        .notification.warning {
+            background: var(--color-warning);
+        }
+        
+        /* ===== ЗАКЛАДКИ В БОКОВОЙ ПАНЕЛИ ===== */
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 0.875rem;
+        }
+        
+        .bookmark-item:hover {
+            border-color: var(--color-accent);
+            background: var(--color-accent-light);
+        }
+        
+        .bookmark-item-name {
+            font-weight: 500;
+            color: var(--color-text);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .bookmark-remove-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-lighter);
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 0.25rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .bookmark-remove-btn:hover {
+            color: #ef4444;
+        }
+        
+        /* ===== ЗАГРУЗКА ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+                padding-bottom: var(--spacing-lg);
+                margin-bottom: var(--spacing-lg);
+            }
+            
+            .cube-controls-container {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .layer-nav {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--spacing-md);
+            }
+            
+            .mechanics-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .sandbox-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: var(--spacing-md);
+            }
+            
+            .sandbox-library, .sandbox-advice {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--spacing-md);
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                text-align: center;
+            }
+            
+            .main-nav {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.8125rem;
+            }
+            
+            .layer-nav-section {
+                padding: var(--spacing-sm) var(--spacing-md);
+                top: 124px;
+            }
+            
+            .layer-nav {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .main-container {
+                padding: var(--spacing-md);
+            }
+            
+            .cube-container {
+                padding: var(--spacing-md);
+            }
+            
+            .cube-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .mechanics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            .sort-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--spacing-sm);
+            }
+            
+            .sort-controls .btn-accent {
+                width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--spacing-sm);
+            }
+            
+            .stat-card {
+                padding: var(--spacing-md);
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-content {
+                align-items: stretch;
+            }
+            
+            .main-nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                min-width: 140px;
+                justify-content: center;
+            }
+            
+            .layer-nav {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .cube-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .sort-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--spacing-sm);
+            }
+            
+            .mechanic-name {
+                font-size: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: var(--spacing-md);
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .sidebar {
+                height: auto;
+            }
+        }
+        
+        /* ===== УТИЛИТЫ ===== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-1 { margin-bottom: var(--spacing-md); }
+        .mb-2 { margin-bottom: var(--spacing-lg); }
+        .mt-1 { margin-top: var(--spacing-md); }
+        .mt-2 { margin-top: var(--spacing-lg); }
+        
+        /* Иконка развертывания */
+        .expand-icon {
+            position: absolute;
+            right: var(--spacing-lg);
+            top: var(--spacing-lg);
+            transition: transform 0.2s;
+            color: var(--color-accent);
+            font-size: 0.875rem;
+        }
+        
+        .mechanic-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Анимация пульсации */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Контент внутри развернутой карточки */
+        .detailed-content {
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+        }
+        
+        /* Страница закладок */
+        .bookmarks-page .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .bookmarks-page .sort-controls {
+            width: 100%;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            background: var(--color-surface);
+            color: var(--color-text-light);
+        }
+        
+        .empty-state h3 {
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .empty-state p {
+            margin-bottom: 0;
+        }
+        
+        /* Стили для библиотеки механик в песочнице */
+        .library-mechanic {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: grab;
+            transition: all var(--transition-fast);
+        }
+        
+        .library-mechanic:hover {
+            border-color: var(--color-accent);
+            background: var(--color-accent-light);
+            transform: translateX(4px);
+        }
+        
+        .library-mechanic:active {
+            cursor: grabbing;
+        }
+        
+        .sandbox-library-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузка -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div style="color: var(--color-text-light); font-weight: 500; font-size: 0.875rem;">Загрузка базы механик...</div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notificationContainer"></div>
+
+    <!-- ШАПКА -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showMainPage()">
+                <i class="logo-icon fas fa-cubes"></i>
+                <span>C<span class="logo-accent">ore</span>LIN</span>
+                <span class="version-badge">v0.3</span>
+            </a>
+            
+            <nav class="main-nav" id="mainNav">
+                <button class="nav-btn active" onclick="showMainPage()">
+                    <i class="fas fa-database icon-accent"></i> База механик
+                </button>
+                <button class="nav-btn" onclick="showCubePage()">
+                    <i class="fas fa-dice icon-accent"></i> Генератор
+                </button>
+                <button class="nav-btn" onclick="showBookmarks()">
+                    <i class="fas fa-bookmark icon-accent"></i> Закладки
+                </button>
+                <button class="nav-btn" onclick="showSandbox()">
+                    <i class="fas fa-shapes icon-accent"></i> Умная песочница
+                </button>
+                <a href="https://t.me/eduletyago" target="_blank" class="nav-btn author-link">
+                    <i class="fab fa-telegram icon-accent"></i> Автор
+                </a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- НАВИГАЦИЯ СЛОЁВ -->
+    <section class="layer-nav-section">
+        <div class="layer-nav-header">
+            <h4 style="margin: 0; color: var(--color-text); font-size: 0.9375rem;">Слои механик:</h4>
+            <button class="toggle-layers-btn" onclick="toggleLayers()" id="toggleLayersBtn">
+                <i class="fas fa-chevron-down"></i>
+                <span>Свернуть</span>
+            </button>
+        </div>
+        <div class="layer-nav" id="layerNav">
+            <button class="layer-btn" onclick="filterByLayer('core_loop')">
+                <i class="fas fa-redo-alt"></i> Core Loop
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('progression')">
+                <i class="fas fa-chart-line"></i> Progression
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('economy')">
+                <i class="fas fa-coins"></i> Economy
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('time')">
+                <i class="fas fa-clock"></i> Time
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('uncertainty')">
+                <i class="fas fa-dice"></i> Uncertainty
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('information')">
+                <i class="fas fa-info-circle"></i> Information
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('space')">
+                <i class="fas fa-expand-arrows-alt"></i> Space
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('social')">
+                <i class="fas fa-users"></i> Social
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('psychology')">
+                <i class="fas fa-brain"></i> Psychology
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('restriction')">
+                <i class="fas fa-lock"></i> Restriction
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('onboarding')">
+                <i class="fas fa-graduation-cap"></i> Onboarding
+            </button>
+            <button class="layer-btn" onclick="filterByLayer('meta')">
+                <i class="fas fa-infinity"></i> Meta
+            </button>
+        </div>
+    </section>
+    
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main>
+        <!-- ГЛАВНАЯ СТРАНИЦА -->
+        <div id="mainPage">
+            <div class="main-container">
+                <!-- БОКОВАЯ ПАНЕЛЬ -->
+                <aside class="sidebar">
+                    <div class="bento-card sidebar-section accent">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-filter icon-accent"></i> Фильтры
+                        </h3>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Слой механики</label>
+                            <select class="filter-select" id="layerFilter" onchange="applyFilters()">
+                                <option value="">Все слои</option>
+                                <option value="core_loop">Core Loop</option>
+                                <option value="progression">Progression</option>
+                                <option value="economy">Economy</option>
+                                <option value="time">Time</option>
+                                <option value="uncertainty">Uncertainty</option>
+                                <option value="information">Information</option>
+                                <option value="space">Space</option>
+                                <option value="social">Social</option>
+                                <option value="psychology">Psychology</option>
+                                <option value="restriction">Restriction</option>
+                                <option value="onboarding">Onboarding</option>
+                                <option value="meta">Meta</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Поиск по названию</label>
+                            <input type="text" class="filter-input" id="searchInput" placeholder="Введите запрос..." oninput="applyFilters()">
+                        </div>
+                        
+                        <button class="btn btn-accent" onclick="saveCurrentFilter()">
+                            <i class="fas fa-save"></i> Сохранить фильтр
+                        </button>
+                    </div>
+                    
+                    <!-- СОХРАНЁННЫЕ ФИЛЬТРЫ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-folder"></i> Сохранённые фильтры
+                        </h3>
+                        <div class="saved-filters" id="savedFiltersList">
+                            <!-- Динамическое заполнение -->
+                        </div>
+                    </div>
+                    
+                    <!-- ЗАКЛАДКИ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-bookmark"></i> Закладки
+                        </h3>
+                        <div class="bookmarks-list" id="bookmarksList">
+                            <!-- Динамическое заполнение -->
+                        </div>
+                    </div>
+
+                    <!-- СТАТУС БАЗЫ -->
+                    <div class="bento-card sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-database"></i> Статус базы
+                        </h3>
+                        <div id="databaseStatus">
+                            <div style="font-size: 0.875rem; color: var(--color-text-light);">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="color: var(--color-text); font-weight: 500;">Механик:</span>
+                                    <span id="statusTotalCount" style="float: right; font-weight: 600; color: var(--color-accent);">0</span>
+                                </div>
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="color: var(--color-text); font-weight: 500;">Файлов:</span>
+                                    <span id="statusFileCount" style="float: right; font-weight: 600;">0/12</span>
+                                </div>
+                                <div>
+                                    <span style="color: var(--color-text); font-weight: 500;">Обновлено:</span>
+                                    <span id="statusUpdated" style="float: right; font-size: 0.75rem; color: var(--color-text-lighter);">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- ОСНОВНОЙ КОНТЕНТ -->
+                <div class="content">
+                    <!-- СТАТИСТИКА -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalCount">0</div>
+                            <div class="stat-label">Всего механик</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="filteredCount">0</div>
+                            <div class="stat-label">Найдено</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="bookmarkCount">0</div>
+                            <div class="stat-label">В закладках</div>
+                        </div>
+                    </div>
+                    
+                    <!-- КОНТРОЛЫ СОРТИРОВКИ -->
+                    <div class="sort-controls">
+                        <span class="sort-label">Сортировка:</span>
+                        <select class="sort-select" id="sortBy" onchange="applySorting()">
+                            <option value="default">По умолчанию</option>
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                            <option value="risk_asc">По риску (низкий → высокий)</option>
+                            <option value="risk_desc">По риску (высокий → низкий)</option>
+                            <option value="layer_asc">По слою (А-Я)</option>
+                        </select>
+                        <button class="btn btn-accent" onclick="exportDatabase()" style="width: auto; padding: 0.5rem 1rem;">
+                            <i class="fas fa-download"></i> Экспорт
+                        </button>
+                    </div>
+                    
+                    <!-- СЕТКА МЕХАНИК -->
+                    <div class="mechanics-grid" id="mechanicsGrid">
+                        <!-- Динамическое заполнение -->
+                    </div>
+                    
+                    <!-- ПАГИНАЦИЯ -->
+                    <div class="pagination" id="paginationContainer" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- СТРАНИЦА ГЕНЕРАТОРА -->
+        <div id="cubePage" class="hidden">
+            <div class="cube-container">
+                <div class="cube-header">
+                    <h1>Генератор механик</h1>
+                    <p class="subtitle">Случайные комбинации для дизайна игр и систем</p>
+                </div>
+                
+                <div class="cube-controls-container">
+                    <!-- НАСТРОЙКИ -->
+                    <div class="cube-controls">
+                        <div class="bento-card cube-control-group accent">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-sliders-h icon-accent"></i> Настройки генерации
+                            </h3>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Режим выборки</label>
+                                <select class="filter-select" id="cubeMode">
+                                    <option value="single">Одиночная механика</option>
+                                    <option value="pair">Пара механик</option>
+                                    <option value="triple">Три механики</option>
+                                    <option value="combo">Комбинация (2-5)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Слой механики</label>
+                                <select class="filter-select" id="cubeLayerFilter">
+                                    <option value="">Все слои</option>
+                                    <option value="core_loop">Core Loop</option>
+                                    <option value="progression">Progression</option>
+                                    <option value="economy">Economy</option>
+                                    <option value="time">Time</option>
+                                    <option value="uncertainty">Uncertainty</option>
+                                    <option value="information">Information</option>
+                                    <option value="space">Space</option>
+                                    <option value="social">Social</option>
+                                    <option value="psychology">Psychology</option>
+                                    <option value="restriction">Restriction</option>
+                                    <option value="onboarding">Onboarding</option>
+                                    <option value="meta">Meta</option>
+                                </select>
+                            </div>
+                            
+                            <button class="cube-roll-btn pulse" onclick="rollCube()">
+                                <i class="fas fa-dice"></i>
+                                <span>СГЕНЕРИРОВАТЬ</span>
+                            </button>
+                        </div>
+                        
+                        <div class="bento-card cube-control-group">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-chart-bar"></i> Статистика
+                            </h3>
+                            <div id="cubeFilterStats" class="mt-2">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-border);">
+                                    <span style="font-size: 0.875rem;">Доступно механик:</span>
+                                    <span id="cubeAvailableCount" style="font-weight: 600; color: var(--color-accent);">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 0.875rem;">Всего в базе:</span>
+                                    <span style="font-weight: 600;" id="cubeTotalCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- РЕЗУЛЬТАТ -->
+                    <div class="bento-card cube-result-container">
+                        <div class="cube-result-header">
+                            <h3><i class="fas fa-bolt icon-accent"></i> Результат</h3>
+                            <div id="cubeResultCounter" style="font-weight: 600; color: var(--color-accent); font-size: 0.875rem;"></div>
+                        </div>
+                        
+                        <div class="cube-result-content" id="cubeResultContent">
+                            <div class="cube-result-empty">
+                                <div class="cube-animation">
+                                    <div class="cube-dice"><i class="fas fa-dice"></i></div>
+                                </div>
+                                <h3>Готов к генерации</h3>
+                                <p style="margin-top: 0.5rem; color: var(--color-text-light);">Настройте параметры и нажмите "Сгенерировать"</p>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons" id="cubeActionButtons" style="display: none; margin-top: var(--spacing-xl); gap: var(--spacing-md);">
+                            <button class="btn" onclick="saveCubeResultToBookmarks()">
+                                <i class="fas fa-bookmark"></i> Сохранить
+                            </button>
+                            <button class="btn btn-accent" onclick="createDesignChallenge()">
+                                <i class="fas fa-lightbulb"></i> Задача
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ИСТОРИЯ -->
+                <div class="bento-card cube-control-group mt-3">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-history"></i> История генераций
+                    </h3>
+                    <div id="cubeHistory" class="mt-2">
+                        <p style="text-align: center; padding: 1rem; color: var(--color-text-lighter); font-weight: 500; font-size: 0.875rem;">
+                            История генераций появится здесь
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- СТРАНИЦА ЗАКЛАДОК -->
+        <div id="bookmarksPage" class="hidden">
+            <div class="main-container bookmarks-page">
+                <div class="content">
+                    <div class="content-header">
+                        <h2><i class="fas fa-bookmark icon-accent"></i> Закладки</h2>
+                        <button class="btn" onclick="clearBookmarks()" style="width: auto; font-size: 0.875rem;">
+                            <i class="fas fa-trash"></i> Очистить все
+                        </button>
+                    </div>
+                    
+                    <div class="sort-controls">
+                        <span class="sort-label">Сортировка:</span>
+                        <select class="sort-select" id="bookmarksSortBy" onchange="renderBookmarksPage()">
+                            <option value="default">По дате</option>
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                            <option value="risk_asc">По риску</option>
+                            <option value="layer_asc">По слою</option>
+                        </select>
+                    </div>
+                    
+                    <div id="bookmarksContent" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- СТРАНИЦА УМНОЙ ПЕСОЧНИЦЫ (новая версия) -->
+        <div id="sandboxPage" class="hidden">
+            <div class="sandbox-container">
+                <div class="sandbox-header">
+                    <h1><i class="fas fa-shapes icon-accent"></i> Умная песочница механик v0.3</h1>
+                    <p class="subtitle">Собирайте систему и сразу видите анализ. Каждое действие — мгновенная обратная связь!</p>
+                </div>
+                
+                <div class="sandbox-layout">
+                    <!-- БИБЛИОТЕКА МЕХАНИК -->
+                    <aside class="sandbox-library">
+                        <div class="bento-card">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-book"></i> Библиотека механик
+                            </h3>
+                            
+                            <div class="library-search">
+                                <input type="text" id="sandboxSearch" placeholder="Поиск механик..." 
+                                       oninput="sandboxFilterLibrary()">
+                            </div>
+                            
+                            <div class="library-filters">
+                                <select id="sandboxLayerFilter" onchange="sandboxFilterLibrary()">
+                                    <option value="">Все слои</option>
+                                    <option value="core_loop">Core Loop</option>
+                                    <option value="progression">Progression</option>
+                                    <option value="economy">Economy</option>
+                                    <option value="time">Time</option>
+                                    <option value="uncertainty">Uncertainty</option>
+                                    <option value="information">Information</option>
+                                    <option value="space">Space</option>
+                                    <option value="social">Social</option>
+                                    <option value="psychology">Psychology</option>
+                                    <option value="restriction">Restriction</option>
+                                    <option value="onboarding">Onboarding</option>
+                                    <option value="meta">Meta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="sandbox-library-list" id="sandboxLibrary">
+                                <!-- Механики загружаются динамически -->
+                            </div>
+                        </div>
+                    </aside>
+                    
+                    <!-- ХОЛСТ -->
+                    <main class="sandbox-canvas-container">
+                        <div class="sandbox-canvas" id="sandboxCanvas">
+                            <div class="empty-canvas" id="canvasEmptyState">
+                                <i class="fas fa-shapes" style="font-size: 4rem; color: var(--color-text-lighter); margin-bottom: 1rem;"></i>
+                                <h3>Начните создавать систему</h3>
+                                <p>Перетащите механики из библиотеки слева</p>
+                                <p style="font-size: 0.875rem; margin-top: 0.5rem; color: var(--color-accent);">
+                                    <i class="fas fa-lightbulb"></i> Система будет анализировать каждое ваше действие!
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="canvas-tools">
+                            <button class="btn" onclick="sandboxAutoArrangeMechanics()">
+                                <i class="fas fa-project-diagram"></i> Упорядочить
+                            </button>
+                            <button class="btn" onclick="sandboxCreateSmartConnection()">
+                                <i class="fas fa-link"></i> Умная связь
+                            </button>
+                            <button class="btn btn-accent" onclick="sandboxClearSandbox()">
+                                <i class="fas fa-broom"></i> Очистить
+                            </button>
+                            <button class="btn" onclick="sandboxExport()">
+                                <i class="fas fa-download"></i> Экспорт
+                            </button>
+                        </div>
+                    </main>
+                    
+                    <!-- ПАНЕЛЬ СОВЕТОВ -->
+                    <aside class="sandbox-advice">
+                        <div class="bento-card">
+                            <div class="advice-header">
+                                <h3 class="sidebar-title">
+                                    <i class="fas fa-chart-line"></i> Анализ системы
+                                </h3>
+                                <span id="systemScore" style="font-weight: 600; color: var(--color-safe);">100%</span>
+                            </div>
+                            
+                            <div class="advice-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value" id="sandboxMechanicsCount">0</span>
+                                    <span class="stat-label">Механик</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="sandboxConnectionsCount">0</span>
+                                    <span class="stat-label">Связей</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="sandboxConflictsCount">0</span>
+                                    <span class="stat-label">Конфликтов</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="sandboxSynergiesCount">0</span>
+                                    <span class="stat-label">Синергий</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="live-advice-panel">
+                            <h4><i class="fas fa-lightbulb"></i> Советы системы</h4>
+                            <div class="advice-items" id="adviceItems">
+                                <div class="advice-item positive">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Добро пожаловать!</strong> Начните добавлять механики для анализа
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bento-card" style="margin-top: 1rem;">
+                            <h3 class="sidebar-title">
+                                <i class="fas fa-info-circle"></i> Как это работает
+                            </h3>
+                            <div style="font-size: 0.8125rem; color: var(--color-text-light); line-height: 1.5;">
+                                <p><strong>1.</strong> Перетаскивайте механики на холст</p>
+                                <p><strong>2.</strong> Система сразу анализирует совместимость</p>
+                                <p><strong>3.</strong> Цвет узла показывает его статус</p>
+                                <p><strong>4.</strong> Линии связей показывают силу взаимодействия</p>
+                                <p><strong>5.</strong> Советы обновляются в реальном времени</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ===== КОНФИГУРАЦИЯ =====
+        const JSON_FILES = [
+            'CORE_LOOP.json',
+            'PROGRESSION.json',
+            'ECONOMY.json',
+            'TIME.json',
+            'UNCERTAINTY.json',
+            'INFORMATION.json',
+            'SPACE.json',
+            'SOCIAL.json',
+            'PSYCHOLOGY.json',
+            'RESTRICTIONS.json',
+            'ONBOARDING.json',
+            'META.json'
+        ];
+
+        const RISK_MAPPING = {
+            'низкий': ['green', 'низкий', 'low'],
+            'средний': ['yellow', 'средний', 'medium'],
+            'высокий': ['red', 'высокий', 'high']
+        };
+
+        const LAYER_NAMES = {
+            'core_loop': 'Core Loop',
+            'progression': 'Progression',
+            'economy': 'Economy',
+            'time': 'Time',
+            'uncertainty': 'Uncertainty',
+            'information': 'Information',
+            'space': 'Space',
+            'social': 'Social',
+            'psychology': 'Psychology',
+            'restriction': 'Restriction',
+            'onboarding': 'Onboarding',
+            'meta': 'Meta'
+        };
+
+        const LAYER_ICONS = {
+            'core_loop': 'fa-redo-alt',
+            'progression': 'fa-chart-line',
+            'economy': 'fa-coins',
+            'time': 'fa-clock',
+            'uncertainty': 'fa-dice',
+            'information': 'fa-info-circle',
+            'space': 'fa-expand-arrows-alt',
+            'social': 'fa-users',
+            'psychology': 'fa-brain',
+            'restriction': 'fa-lock',
+            'onboarding': 'fa-graduation-cap',
+            'meta': 'fa-infinity'
+        };
+
+        // ===== ГОСУДАРСТВО ОСНОВНОЙ БАЗЫ =====
+        let mechanicsDatabase = [];
+        let filteredMechanics = [];
+        let bookmarks = JSON.parse(localStorage.getItem('corelin_bookmarks') || '[]');
+        let savedFilters = JSON.parse(localStorage.getItem('corelin_filters') || '[]');
+        let cubeHistory = JSON.parse(localStorage.getItem('corelin_history') || '[]');
+        let lastCubeResult = null;
+        let expandedCardId = null;
+        let expandedBookmarkCardId = null;
+        let currentSort = 'default';
+        let currentPage = 1;
+        const pageSize = 15;
+        let loadedFiles = 0;
+        let totalFilesToLoad = JSON_FILES.length;
+        let layersCollapsed = false;
+        
+        // ===== ГОСУДАРСТВО ПЕСОЧНИЦЫ =====
+        let sandboxMechanics = JSON.parse(localStorage.getItem('corelin_sandbox') || '[]');
+        let sandboxConnections = JSON.parse(localStorage.getItem('corelin_connections') || '[]');
+        let selectedNodeId = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // ===== УТИЛИТЫ =====
+        function showNotification(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            container.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.style.display = 'flex';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
+        }
+
+        function updateDatabaseStatus() {
+            document.getElementById('statusTotalCount').textContent = mechanicsDatabase.length;
+            document.getElementById('statusFileCount').textContent = `${loadedFiles}/${totalFilesToLoad}`;
+            document.getElementById('statusUpdated').textContent = new Date().toLocaleTimeString('ru-RU');
+        }
+
+        function getRiskText(risk) {
+            switch(risk) {
+                case 'low': return 'Низкий';
+                case 'medium': return 'Средний';
+                case 'high': return 'Высокий';
+                default: return 'Средний';
+            }
+        }
+
+        // ===== ЗАГРУЗКА БАЗЫ ДАННЫХ =====
+        async function loadMechanicsDatabase() {
+            showLoading(true);
+            mechanicsDatabase = [];
+            filteredMechanics = [];
+            loadedFiles = 0;
+            
+            const loadingPromises = JSON_FILES.map(async (file) => {
+                try {
+                    console.log(`Загрузка файла: ${file}`);
+                    const response = await fetch(file);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status} для файла ${file}`);
+                    }
+                    
+                    const mechanics = await response.json();
+                    loadedFiles++;
+                    
+                    // Валидация и нормализация данных
+                    const normalizedMechanics = mechanics.map(mechanic => ({
+                        ...mechanic,
+                        // Нормализуем risk_color
+                        risk_color: normalizeRiskColor(mechanic.risk_color),
+                        // Нормализуем layer
+                        layer: mechanic.layer?.toLowerCase().replace(/ /g, '_') || 'unknown'
+                    }));
+                    
+                    console.log(`Загружено ${normalizedMechanics.length} механик из ${file}`);
+                    return normalizedMechanics;
+                } catch (error) {
+                    console.warn(`Не удалось загрузить ${file}:`, error);
+                    loadedFiles++;
+                    return [];
+                }
+            });
+
+            try {
+                const results = await Promise.allSettled(loadingPromises);
+                
+                // Собираем все механики
+                results.forEach(result => {
+                    if (result.status === 'fulfilled' && result.value.length > 0) {
+                        mechanicsDatabase.push(...result.value);
+                    }
+                });
+
+                // Проверяем, что данные загружены
+                if (mechanicsDatabase.length === 0) {
+                    console.warn('База пуста, загружаю тестовые данные');
+                    throw new Error('Не удалось загрузить ни одной механики');
+                }
+
+                // Убираем дубликаты по ID
+                const uniqueIds = new Set();
+                mechanicsDatabase = mechanicsDatabase.filter(mechanic => {
+                    if (uniqueIds.has(mechanic.id)) {
+                        console.warn(`Дубликат механики: ${mechanic.id}`);
+                        return false;
+                    }
+                    uniqueIds.add(mechanic.id);
+                    return true;
+                });
+
+                filteredMechanics = [...mechanicsDatabase];
+                
+                showNotification(`Загружено ${mechanicsDatabase.length} механик из ${loadedFiles} файлов`, 'info');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки базы данных:', error);
+                showNotification('Ошибка загрузки базы данных. Используются тестовые данные.', 'error');
+                loadFallbackData();
+            } finally {
+                updateDatabaseStatus();
+                applySorting();
+                updateStats();
+                updateBookmarksList();
+                // Инициализируем песочницу
+                sandboxInitialize();
+                showLoading(false);
+            }
+        }
+
+        function normalizeRiskColor(riskColor) {
+            if (!riskColor) return 'medium';
+            
+            const risk = riskColor.toString().toLowerCase().trim();
+            if (RISK_MAPPING['низкий'].includes(risk)) return 'low';
+            if (RISK_MAPPING['средний'].includes(risk)) return 'medium';
+            if (RISK_MAPPING['высокий'].includes(risk)) return 'high';
+            
+            // Попробуем распознать по первому символу
+            if (risk.includes('низ') || risk.includes('low') || risk.includes('зелен')) return 'low';
+            if (risk.includes('сред') || risk.includes('medium') || risk.includes('желт')) return 'medium';
+            if (risk.includes('высок') || risk.includes('high') || risk.includes('красн')) return 'high';
+            
+            return 'medium';
+        }
+
+        function loadFallbackData() {
+            // Минимальный набор тестовых данных для песочницы
+            mechanicsDatabase = [
+                {
+                    "id": "action_feedback",
+                    "name": "Действие с мгновенным фидбеком",
+                    "layer": "core_loop",
+                    "description": "Любое действие игрока немедленно вызывает ощутимую, предсказуемую реакцию системы.",
+                    "tags": ["фундаментальная", "интерактивность", "отклик"],
+                    "interaction_type": ["физическое", "ментальное"],
+                    "motivation": { 
+                        "type": "внутренняя", 
+                        "notes": "Удовлетворяет базовую потребность в агентности и контроле." 
+                    },
+                    "game_examples": [
+                        {
+                            "title": "Super Mario",
+                            "implementation": "Нажатие кнопки прыжка → мгновенный прыжок персонажа"
+                        }
+                    ],
+                    "product_examples": [
+                        "Кнопка 'Отправить' в мессенджере показывает анимацию отправки"
+                    ],
+                    "education_examples": [
+                        "Нажатие на интерактивный элемент вызывает немедленный отклик"
+                    ],
+                    "abuse_risks": [
+                        "Злоупотребление ярким фидбеком может вызывать зависимость"
+                    ],
+                    "ethical_constraints": [
+                        "Фидбек должен быть правдивым и не вводить в заблуждение"
+                    ],
+                    "toxicity_level": "низкий",
+                    "risk_color": "low",
+                    "scaling_risk": "При высокой нагрузке задержка разрушает иллюзию мгновенности",
+                    "related_mechanics": ["повторяемое_действие"]
+                },
+                {
+                    "id": "progression_system",
+                    "name": "Система прогрессии",
+                    "layer": "progression",
+                    "description": "Механика, которая позволяет игрокам развивать свои навыки, получать новые способности или улучшать характеристики со временем.",
+                    "tags": ["развитие", "рост", "мотивация"],
+                    "interaction_type": ["длительное"],
+                    "motivation": { 
+                        "type": "внешняя", 
+                        "notes": "Стимулирует постоянное участие через видимый прогресс и достижения." 
+                    },
+                    "game_examples": [
+                        {
+                            "title": "World of Warcraft",
+                            "implementation": "Уровни персонажа, получаемые за опыт от выполнения заданий"
+                        }
+                    ],
+                    "product_examples": [
+                        "Баллы лояльности в программах поощрения клиентов"
+                    ],
+                    "education_examples": [
+                        "Система баллов за выполненные задания и модули"
+                    ],
+                    "abuse_risks": [
+                        "Может вызывать игровую зависимость из-за постоянного желания достичь следующего уровня"
+                    ],
+                    "ethical_constraints": [
+                        "Прогрессия должна быть достижима без чрезмерных затрат времени или денег"
+                    ],
+                    "toxicity_level": "средний",
+                    "risk_color": "medium",
+                    "scaling_risk": "На высоких уровнях может потребоваться непропорционально много времени для прогресса",
+                    "related_mechanics": ["награда", "достижения"]
+                },
+                {
+                    id: "lootboxes",
+                    name: "Лутбоксы",
+                    layer: "economy",
+                    description: "Случайные награды за реальные деньги",
+                    tags: ["монетизация", "случайность"],
+                    risk_color: "high",
+                    toxicity_level: "высокий"
+                },
+                {
+                    id: "daily_quests",
+                    name: "Ежедневные задания",
+                    layer: "progression",
+                    description: "Регулярные задачи для ежедневного вовлечения",
+                    tags: ["повторение", "вовлечение"],
+                    risk_color: "medium",
+                    toxicity_level: "средний"
+                },
+                {
+                    id: "social_leaderboard",
+                    name: "Таблица лидеров",
+                    layer: "social",
+                    description: "Сравнение результатов игроков",
+                    tags: ["соревнование", "рейтинг"],
+                    risk_color: "high",
+                    toxicity_level: "высокий"
+                }
+            ];
+            filteredMechanics = [...mechanicsDatabase];
+        }
+
+        // ===== НАВИГАЦИЯ =====
+        function showMainPage() {
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('cubePage').classList.add('hidden');
+            document.getElementById('bookmarksPage').classList.add('hidden');
+            document.getElementById('sandboxPage').classList.add('hidden');
+            updateNavButtons('main');
+            applySorting();
+        }
+
+        function showCubePage() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('cubePage').classList.remove('hidden');
+            document.getElementById('bookmarksPage').classList.add('hidden');
+            document.getElementById('sandboxPage').classList.add('hidden');
+            updateNavButtons('cube');
+            updateCubeFilterStats();
+        }
+
+        function showBookmarks() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('cubePage').classList.add('hidden');
+            document.getElementById('bookmarksPage').classList.remove('hidden');
+            document.getElementById('sandboxPage').classList.add('hidden');
+            updateNavButtons('bookmarks');
+            renderBookmarksPage();
+        }
+
+        function showSandbox() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('cubePage').classList.add('hidden');
+            document.getElementById('bookmarksPage').classList.add('hidden');
+            document.getElementById('sandboxPage').classList.remove('hidden');
+            updateNavButtons('sandbox');
+            sandboxRenderLibrary();
+            sandboxRenderCanvas();
+        }
+
+        function updateNavButtons(active) {
+            const buttons = document.querySelectorAll('.nav-btn:not(.author-link)');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (active === 'main') buttons[0].classList.add('active');
+            if (active === 'cube') buttons[1].classList.add('active');
+            if (active === 'bookmarks') buttons[2].classList.add('active');
+            if (active === 'sandbox') buttons[3].classList.add('active');
+        }
+
+        // ===== ОСНОВНАЯ БАЗА МЕХАНИК =====
+        function applyFilters() {
+            const layer = document.getElementById('layerFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredMechanics = mechanicsDatabase.filter(mechanic => {
+                // Фильтр по слою
+                if (layer && mechanic.layer !== layer) return false;
+                
+                // Поиск
+                if (search && !(
+                    mechanic.name.toLowerCase().includes(search) ||
+                    mechanic.description.toLowerCase().includes(search) ||
+                    (mechanic.tags && mechanic.tags.some(tag => tag.toLowerCase().includes(search)))
+                )) return false;
+                
+                return true;
+            });
+            
+            expandedCardId = null;
+            currentPage = 1;
+            applySorting();
+        }
+
+        function filterByLayer(layer) {
+            document.getElementById('layerFilter').value = layer;
+            applyFilters();
+        }
+
+        function applySorting() {
+            currentSort = document.getElementById('sortBy').value;
+            
+            if (currentSort !== 'default') {
+                filteredMechanics.sort((a, b) => {
+                    switch(currentSort) {
+                        case 'name_asc':
+                            return a.name.localeCompare(b.name);
+                        case 'name_desc':
+                            return b.name.localeCompare(a.name);
+                        case 'risk_asc':
+                            const riskOrder = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrder[a.risk_color] || 1) - (riskOrder[b.risk_color] || 1);
+                        case 'risk_desc':
+                            const riskOrderDesc = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrderDesc[b.risk_color] || 1) - (riskOrderDesc[a.risk_color] || 1);
+                        case 'layer_asc':
+                            return (LAYER_NAMES[a.layer] || '').localeCompare(LAYER_NAMES[b.layer] || '');
+                        default:
+                            return 0;
+                    }
+                });
+            }
+            
+            renderMechanics();
+            updateStats();
+        }
+
+        function renderMechanics() {
+            const grid = document.getElementById('mechanicsGrid');
+            
+            if (filteredMechanics.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Механики не найдены</h3>
+                        <p>Попробуйте изменить параметры фильтрации</p>
+                    </div>
+                `;
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+            
+            // Пагинация
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredMechanics.length);
+            const pageMechanics = filteredMechanics.slice(startIndex, endIndex);
+            
+            grid.innerHTML = '';
+            pageMechanics.forEach(mechanic => {
+                const isBookmarked = bookmarks.includes(mechanic.id);
+                const isExpanded = expandedCardId === mechanic.id;
+                
+                const card = document.createElement('div');
+                card.className = `mechanic-card ${isExpanded ? 'expanded' : ''} fade-in`;
+                card.setAttribute('data-id', mechanic.id);
+                card.innerHTML = createCardContent(mechanic, isBookmarked, isExpanded, false);
+                
+                card.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    toggleCard(mechanic.id);
+                });
+                
+                grid.appendChild(card);
+            });
+            
+            renderPagination();
+        }
+
+        function createCardContent(mechanic, isBookmarked, isExpanded, isBookmarkPage = false) {
+            const layerName = LAYER_NAMES[mechanic.layer] || mechanic.layer;
+            const layerIcon = LAYER_ICONS[mechanic.layer] || 'fa-question';
+            
+            return `
+                <div class="compact-header">
+                    <div style="position: relative; padding-right: 2.5rem;">
+                        <div class="mechanic-id">${mechanic.id}</div>
+                        <div class="mechanic-name">${mechanic.name}</div>
+                        <div class="mechanic-description">
+                            ${mechanic.description}
+                        </div>
+                        <div class="mechanic-meta">
+                            <span class="layer-badge">
+                                <i class="fas ${layerIcon}" style="font-size: 0.75rem;"></i> ${layerName}
+                            </span>
+                            <span class="risk-badge risk-${mechanic.risk_color}">
+                                ${mechanic.risk_color === 'high' ? '⚠️ ' : ''}${getRiskText(mechanic.risk_color)}
+                            </span>
+                            ${isBookmarked ? '<span style="color: var(--color-accent);"><i class="fas fa-bookmark" style="font-size: 0.875rem;"></i></span>' : ''}
+                            ${mechanic.tags ? mechanic.tags.slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                        </div>
+                        <div class="expand-icon"><i class="fas fa-chevron-down"></i></div>
+                    </div>
+                </div>
+                
+                <div class="detailed-content">
+                    ${isExpanded ? renderDetailedContent(mechanic, isBookmarked, isBookmarkPage) : ''}
+                </div>
+            `;
+        }
+
+        function renderDetailedContent(mechanic, isBookmarked, isBookmarkPage = false) {
+            return `
+                <div style="padding: var(--spacing-lg); padding-top: 0;">
+                    <div style="margin: var(--spacing-lg) 0;">
+                        <h5 style="color: var(--color-accent); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-bolt" style="font-size: 0.875rem;"></i> Мотивация
+                        </h5>
+                        <div style="font-size: 0.875rem; margin-bottom: 0.25rem;"><strong>Тип:</strong> ${mechanic.motivation?.type || 'Не указан'}</div>
+                        <div style="margin-top: var(--spacing-sm); padding: var(--spacing-sm); background: var(--color-accent-light); border-radius: var(--radius-md); font-size: 0.875rem;">
+                            ${mechanic.motivation?.notes || 'Нет описания мотивации'}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--spacing-md); margin: var(--spacing-lg) 0;">
+                        ${mechanic.game_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h6 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-gamepad" style="font-size: 0.875rem;"></i> В играх
+                            </h6>
+                            ${Array.isArray(mechanic.game_examples) ? mechanic.game_examples.map(ex => `
+                                <div style="margin-bottom: var(--spacing-sm);">
+                                    <div style="font-weight: 600; color: var(--color-text); font-size: 0.875rem;">${ex.title || 'Пример'}</div>
+                                    <div style="font-size: 0.8125rem; color: var(--color-text-light); margin-top: 0.125rem;">${ex.implementation || ex.details || ''}</div>
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light); font-size: 0.875rem;">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                        
+                        ${mechanic.product_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h6 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-mobile-alt" style="font-size: 0.875rem;"></i> В продуктах
+                            </h6>
+                            ${Array.isArray(mechanic.product_examples) ? mechanic.product_examples.map(ex => `
+                                <div style="margin-bottom: 0.5rem; font-size: 0.8125rem; color: var(--color-text-light); padding-left: 1rem; position: relative;">
+                                    <div style="position: absolute; left: 0; color: var(--color-accent); font-size: 0.875rem;">•</div> ${ex}
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light); font-size: 0.875rem;">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                        
+                        ${mechanic.education_examples ? `
+                        <div style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); background: var(--color-surface);">
+                            <h6 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-graduation-cap" style="font-size: 0.875rem;"></i> В образовании
+                            </h6>
+                            ${Array.isArray(mechanic.education_examples) ? mechanic.education_examples.map(ex => `
+                                <div style="margin-bottom: 0.5rem; font-size: 0.8125rem; color: var(--color-text-light); padding-left: 1rem; position: relative;">
+                                    <div style="position: absolute; left: 0; color: var(--color-accent); font-size: 0.875rem;">•</div> ${ex}
+                                </div>
+                            `).join('') : '<p style="color: var(--color-text-light); font-size: 0.875rem;">Примеры не указаны</p>'}
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${mechanic.abuse_risks && mechanic.abuse_risks.length > 0 ? `
+                    <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background: var(--color-accent-light); border-left: 3px solid var(--color-accent); border-radius: var(--radius-md);">
+                        <h6 style="color: var(--color-accent-dark); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 0.875rem;"></i> Риски злоупотребления
+                        </h6>
+                        <ul style="padding-left: 1.25rem; font-size: 0.875rem;">
+                            ${mechanic.abuse_risks.map(risk => `<li style="margin-bottom: 0.375rem; color: var(--color-text-light);">${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);">
+                        <h6 style="color: var(--color-text); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-balance-scale" style="font-size: 0.875rem;"></i> Анализ
+                        </h6>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-md);">
+                            <div>
+                                <div style="font-size: 0.875rem;"><strong>Уровень токсичности:</strong></div>
+                                <div style="font-weight: 600; color: ${mechanic.toxicity_level === 'high' ? 'var(--color-accent)' : 'var(--color-text)'}; font-size: 0.875rem;">
+                                    ${mechanic.toxicity_level === 'high' ? '🔴 Высокий' : mechanic.toxicity_level === 'medium' ? '🟡 Средний' : '🟢 Низкий'}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem;"><strong>Риск масштабирования:</strong></div>
+                                <div style="font-size: 0.8125rem; color: var(--color-text-light);">${mechanic.scaling_risk || 'Не указан'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
+                        <button class="btn" onclick="event.stopPropagation(); toggleBookmark('${mechanic.id}')" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                            <i class="fas ${isBookmarked ? 'fa-bookmark' : 'fa-bookmark'}"></i>
+                            ${isBookmarked ? 'Удалить' : 'В закладки'}
+                        </button>
+                        <button class="btn btn-accent" onclick="event.stopPropagation(); copyMechanicToClipboard('${mechanic.id}')" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                        ${isBookmarkPage ? `
+                        <button class="btn" onclick="event.stopPropagation(); removeFromBookmarks('${mechanic.id}')" style="flex: 1; background: #fef2f2; color: #dc2626; border-color: #fecaca; font-size: 0.875rem; padding: 0.5rem;">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCard(mechanicId) {
+            if (expandedCardId === mechanicId) {
+                expandedCardId = null;
+            } else {
+                expandedCardId = mechanicId;
+            }
+            renderMechanics();
+        }
+
+        // ===== СВОРАЧИВАНИЕ СЛОЁВ =====
+        function toggleLayers() {
+            const layerNav = document.getElementById('layerNav');
+            const toggleBtn = document.getElementById('toggleLayersBtn');
+            
+            layersCollapsed = !layersCollapsed;
+            
+            if (layersCollapsed) {
+                layerNav.classList.add('collapsed');
+                toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i><span>Развернуть</span>';
+            } else {
+                layerNav.classList.remove('collapsed');
+                toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i><span>Свернуть</span>';
+            }
+        }
+
+        // ===== СТАТИСТИКА =====
+        function updateStats() {
+            document.getElementById('totalCount').textContent = mechanicsDatabase.length;
+            document.getElementById('filteredCount').textContent = filteredMechanics.length;
+            document.getElementById('bookmarkCount').textContent = bookmarks.length;
+        }
+
+        // ===== ГЕНЕРАТОР =====
+        function updateCubeFilterStats() {
+            const filtered = getFilteredMechanicsForCube();
+            document.getElementById('cubeAvailableCount').textContent = filtered.length;
+            document.getElementById('cubeTotalCount').textContent = mechanicsDatabase.length;
+        }
+
+        function getFilteredMechanicsForCube() {
+            const layerFilter = document.getElementById('cubeLayerFilter').value;
+            
+            return mechanicsDatabase.filter(mechanic => {
+                if (layerFilter && mechanic.layer !== layerFilter) return false;
+                return true;
+            });
+        }
+
+        function rollCube() {
+            const mode = document.getElementById('cubeMode').value;
+            const availableMechanics = getFilteredMechanicsForCube();
+            
+            if (availableMechanics.length === 0) {
+                showCubeResult([], 'empty');
+                return;
+            }
+            
+            // Анимация
+            const animation = document.querySelector('.cube-animation');
+            if (animation) {
+                animation.innerHTML = '<div class="cube-dice"><i class="fas fa-dice"></i></div>';
+            }
+            
+            // Выбор механик
+            let count = 0;
+            switch(mode) {
+                case 'single': count = 1; break;
+                case 'pair': count = 2; break;
+                case 'triple': count = 3; break;
+                case 'combo': count = 2 + Math.floor(Math.random() * 4); break;
+            }
+            
+            count = Math.min(count, availableMechanics.length);
+            const shuffled = [...availableMechanics].sort(() => Math.random() - 0.5);
+            const selectedMechanics = shuffled.slice(0, count);
+            
+            lastCubeResult = {
+                mechanics: selectedMechanics,
+                timestamp: new Date().toISOString(),
+                filters: {
+                    layer: document.getElementById('cubeLayerFilter').value,
+                    mode: mode
+                }
+            };
+            
+            cubeHistory.unshift({
+                mechanics: selectedMechanics.map(m => ({id: m.id, name: m.name})),
+                timestamp: lastCubeResult.timestamp
+            });
+            
+            cubeHistory = cubeHistory.slice(0, 10);
+            localStorage.setItem('corelin_history', JSON.stringify(cubeHistory));
+            
+            setTimeout(() => {
+                showCubeResult(selectedMechanics, 'success');
+                updateCubeHistory();
+            }, 800);
+        }
+
+        function showCubeResult(mechanics, status) {
+            const content = document.getElementById('cubeResultContent');
+            const actions = document.getElementById('cubeActionButtons');
+            const counter = document.getElementById('cubeResultCounter');
+            
+            if (!content) return;
+            
+            if (status === 'empty') {
+                content.innerHTML = `
+                    <div class="cube-result-empty">
+                        <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--color-accent);">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3>Нет доступных механик</h3>
+                        <p style="margin-top: 0.5rem; color: var(--color-text-light);">Измените настройки фильтров</p>
+                    </div>
+                `;
+                if (actions) actions.style.display = 'none';
+                if (counter) counter.textContent = '';
+                return;
+            }
+            
+            if (mechanics.length === 0) {
+                content.innerHTML = `
+                    <div class="cube-result-empty">
+                        <div class="cube-animation">
+                            <div class="cube-dice"><i class="fas fa-dice"></i></div>
+                        </div>
+                        <h3>Готов к генерации</h3>
+                        <p style="margin-top: 0.5rem; color: var(--color-text-light);">Настройте параметры и нажмите "Сгенерировать"</p>
+                    </div>
+                `;
+                if (actions) actions.style.display = 'none';
+                if (counter) counter.textContent = '';
+                return;
+            }
+            
+            const resultHTML = mechanics.map(mechanic => `
+                <div class="cube-mechanic-card" onclick="event.stopPropagation(); showMainPage(); searchMechanic('${mechanic.id}')">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 1rem; font-weight: 600; color: var(--color-accent); margin-bottom: 0.25rem;">
+                                ${mechanic.name}
+                            </div>
+                            <div style="font-size: 0.8125rem; color: var(--color-text-light);">
+                                ${mechanic.description.substring(0, 100)}${mechanic.description.length > 100 ? '...' : ''}
+                            </div>
+                        </div>
+                        <span class="risk-badge risk-${mechanic.risk_color}" style="margin-left: 1rem; font-size: 0.75rem;">
+                            ${getRiskText(mechanic.risk_color)}
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 0.75rem; align-items: center;">
+                        <span class="layer-badge" style="background: var(--color-accent-light); color: var(--color-accent-dark); font-size: 0.75rem;">
+                            ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+                        </span>
+                        <div style="display: flex; gap: 0.25rem;">
+                            ${mechanic.tags ? mechanic.tags.slice(0, 3).map(tag => `<span class="tag" style="font-size: 0.75rem;">${tag}</span>`).join('') : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            content.innerHTML = resultHTML;
+            if (actions) actions.style.display = 'flex';
+            if (counter) counter.textContent = `Выбрано: ${mechanics.length}`;
+        }
+
+        // ===== ЗАКЛАДКИ =====
+        function toggleBookmark(id) {
+            const index = bookmarks.indexOf(id);
+            if (index === -1) {
+                bookmarks.push(id);
+                showNotification('Добавлено в закладки', 'info');
+            } else {
+                bookmarks.splice(index, 1);
+                showNotification('Удалено из закладок', 'info');
+            }
+            localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+            renderMechanics();
+            updateBookmarksList();
+            if (document.getElementById('bookmarksPage').classList.contains('hidden') === false) {
+                renderBookmarksPage();
+            }
+        }
+
+        function updateBookmarksList() {
+            const list = document.getElementById('bookmarksList');
+            if (!list) return;
+            
+            list.innerHTML = '';
+            
+            const bookmarkMechanics = bookmarks
+                .map(id => mechanicsDatabase.find(m => m.id === id))
+                .filter(m => m)
+                .slice(0, 5);
+            
+            if (bookmarkMechanics.length === 0) {
+                list.innerHTML = '<p style="color: var(--color-text-lighter); font-size: 0.875rem; text-align: center; padding: 0.5rem;">Нет закладок</p>';
+                return;
+            }
+            
+            bookmarkMechanics.forEach(mechanic => {
+                const item = document.createElement('div');
+                item.className = 'bookmark-item';
+                item.innerHTML = `
+                    <span class="bookmark-item-name">${mechanic.name}</span>
+                    <button class="bookmark-remove-btn" onclick="event.stopPropagation(); toggleBookmark('${mechanic.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                item.addEventListener('click', () => {
+                    showMainPage();
+                    searchMechanic(mechanic.id);
+                });
+                list.appendChild(item);
+            });
+            
+            document.getElementById('bookmarkCount').textContent = bookmarks.length;
+        }
+
+        function renderBookmarksPage() {
+            const container = document.getElementById('bookmarksContent');
+            if (!container) return;
+            
+            if (bookmarks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Закладок пока нет</h3>
+                        <p>Добавляйте механики в закладки, нажимая на кнопку "Добавить в закладки"</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const bookmarkMechanics = bookmarks
+                .map(id => mechanicsDatabase.find(m => m.id === id))
+                .filter(m => m);
+            
+            const sortBy = document.getElementById('bookmarksSortBy').value;
+            
+            if (sortBy !== 'default') {
+                bookmarkMechanics.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'name_asc': return a.name.localeCompare(b.name);
+                        case 'name_desc': return b.name.localeCompare(a.name);
+                        case 'risk_asc': 
+                            const riskOrder = { 'low': 0, 'medium': 1, 'high': 2 };
+                            return (riskOrder[a.risk_color] || 1) - (riskOrder[b.risk_color] || 1);
+                        case 'layer_asc':
+                            return (LAYER_NAMES[a.layer] || '').localeCompare(LAYER_NAMES[b.layer] || '');
+                        default: return 0;
+                    }
+                });
+            }
+            
+            container.innerHTML = '<div class="mechanics-grid">';
+            bookmarkMechanics.forEach(mechanic => {
+                const isBookmarked = bookmarks.includes(mechanic.id);
+                const isExpanded = expandedBookmarkCardId === mechanic.id;
+                
+                const card = document.createElement('div');
+                card.className = `mechanic-card ${isExpanded ? 'expanded' : ''} fade-in`;
+                card.setAttribute('data-id', mechanic.id);
+                card.innerHTML = createCardContent(mechanic, isBookmarked, isExpanded, true);
+                
+                card.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    toggleBookmarkCard(mechanic.id);
+                });
+                
+                container.querySelector('.mechanics-grid').appendChild(card);
+            });
+            container.innerHTML += '</div>';
+        }
+
+        function toggleBookmarkCard(mechanicId) {
+            if (expandedBookmarkCardId === mechanicId) {
+                expandedBookmarkCardId = null;
+            } else {
+                expandedBookmarkCardId = mechanicId;
+            }
+            renderBookmarksPage();
+        }
+
+        function removeFromBookmarks(id) {
+            const index = bookmarks.indexOf(id);
+            if (index !== -1) {
+                bookmarks.splice(index, 1);
+                localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+                showNotification('Удалено из закладок', 'info');
+                renderBookmarksPage();
+                updateBookmarksList();
+            }
+        }
+
+        function clearBookmarks() {
+            if (confirm('Очистить все закладки? Все сохраненные механики будут удалены.')) {
+                bookmarks = [];
+                localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+                updateBookmarksList();
+                renderBookmarksPage();
+                showNotification('Все закладки очищены', 'info');
+            }
+        }
+
+        // ===== ПАГИНАЦИЯ =====
+        function renderPagination() {
+            const container = document.getElementById('paginationContainer');
+            if (!container) return;
+            
+            const totalPages = Math.ceil(filteredMechanics.length / pageSize);
+            
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            
+            // Кнопка "Назад"
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderMechanics();
+                }
+            };
+            container.appendChild(prevBtn);
+            
+            // Страницы
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderMechanics();
+                };
+                container.appendChild(pageBtn);
+            }
+            
+            // Кнопка "Вперед"
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderMechanics();
+                }
+            };
+            container.appendChild(nextBtn);
+        }
+
+        // ===== УМНАЯ ПЕСОЧНИЦА (новая версия) =====
+        function sandboxInitialize() {
+            sandboxRenderLibrary();
+            sandboxRenderCanvas();
+            sandboxUpdateAdvicePanel();
+            sandboxInitializeDragAndDrop();
+        }
+
+        function sandboxRenderLibrary() {
+            const library = document.getElementById('sandboxLibrary');
+            if (!library) return;
+            
+            const search = document.getElementById('sandboxSearch')?.value.toLowerCase() || '';
+            const layer = document.getElementById('sandboxLayerFilter')?.value || '';
+            
+            const filtered = mechanicsDatabase.filter(mechanic => {
+                if (search && !mechanic.name.toLowerCase().includes(search)) return false;
+                if (layer && mechanic.layer !== layer) return false;
+                return true;
+            });
+            
+            library.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                library.innerHTML = '<p style="text-align: center; color: var(--color-text-light); padding: 1rem;">Не найдено</p>';
+                return;
+            }
+            
+            filtered.forEach(mechanic => {
+                const item = document.createElement('div');
+                item.className = 'library-mechanic';
+                item.setAttribute('draggable', 'true');
+                item.setAttribute('data-id', mechanic.id);
+                item.innerHTML = `
+                    <div style="font-weight: 600; color: var(--color-text); font-size: 0.875rem; margin-bottom: 0.25rem;">
+                        ${mechanic.name}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
+                        ${mechanic.description.substring(0, 60)}...
+                    </div>
+                    <div style="display: flex; gap: 0.25rem; align-items: center;">
+                        <span class="node-badge layer-badge" style="font-size: 0.6875rem;">
+                            ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+                        </span>
+                        <span class="node-badge risk-badge risk-${mechanic.risk_color}" style="font-size: 0.6875rem;">
+                            ${getRiskText(mechanic.risk_color)}
+                        </span>
+                    </div>
+                `;
+                
+                item.addEventListener('dragstart', sandboxHandleDragStart);
+                library.appendChild(item);
+            });
+        }
+
+        function sandboxFilterLibrary() {
+            sandboxRenderLibrary();
+        }
+
+        function sandboxHandleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-id'));
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function sandboxInitializeDragAndDrop() {
+            const canvas = document.getElementById('sandboxCanvas');
+            if (!canvas) return;
+            
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                canvas.classList.add('drag-over');
+            });
+            
+            canvas.addEventListener('dragleave', () => {
+                canvas.classList.remove('drag-over');
+            });
+            
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvas.classList.remove('drag-over');
+                
+                const mechanicId = e.dataTransfer.getData('text/plain');
+                const mechanic = mechanicsDatabase.find(m => m.id === mechanicId);
+                
+                if (mechanic) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left - 80;
+                    const y = e.clientY - rect.top - 40;
+                    
+                    sandboxAddMechanicToCanvas(mechanic, Math.max(0, x), Math.max(0, y));
+                }
+            });
+        }
+
+        function sandboxAddMechanicToCanvas(mechanic, x, y) {
+            const nodeId = `node_${Date.now()}`;
+            const node = {
+                id: nodeId,
+                mechanic: mechanic,
+                position: { x, y },
+                size: { width: 160, height: 100 },
+                analysis: { status: 'neutral' }
+            };
+            
+            sandboxMechanics.push(node);
+            
+            // НЕМЕДЛЕННЫЙ АНАЛИЗ новой механики со всеми существующими
+            const analysis = sandboxAnalyzeNewMechanic(node);
+            node.analysis = analysis;
+            
+            sandboxSaveState();
+            sandboxRenderCanvas();
+            sandboxUpdateAdvicePanel();
+            
+            // Показываем уведомление с анализом
+            let message = `Добавлена "${mechanic.name}"`;
+            if (analysis.hasConflicts) {
+                message += ` ⚠️ Обнаружены конфликты`;
+            }
+            if (analysis.hasSynergies) {
+                message += ` ✨ Найдены синергии`;
+            }
+            
+            showNotification(message, analysis.hasConflicts ? 'warning' : 'info');
+        }
+
+        function sandboxAnalyzeNewMechanic(newNode) {
+            const analysis = {
+                status: 'safe',
+                riskScore: 0,
+                hasConflicts: false,
+                hasSynergies: false,
+                conflicts: [],
+                synergies: []
+            };
+            
+            if (sandboxMechanics.length <= 1) {
+                analysis.status = 'safe';
+                return analysis;
+            }
+            
+            // Анализ с каждой существующей механикой
+            sandboxMechanics.forEach(existingNode => {
+                if (existingNode.id === newNode.id) return;
+                
+                const compatibility = sandboxAnalyzeCompatibility(newNode.mechanic, existingNode.mechanic);
+                
+                if (compatibility.score < 3) {
+                    analysis.hasConflicts = true;
+                    analysis.conflicts.push({
+                        with: existingNode.mechanic.name,
+                        reason: compatibility.reason
+                    });
+                    analysis.riskScore += 2;
+                } else if (compatibility.score > 7) {
+                    analysis.hasSynergies = true;
+                    analysis.synergies.push({
+                        with: existingNode.mechanic.name,
+                        reason: compatibility.reason
+                    });
+                }
+            });
+            
+            // Определяем статус на основе рисков
+            if (newNode.mechanic.risk_color === 'high') {
+                analysis.riskScore += 3;
+            }
+            
+            if (analysis.riskScore >= 3 || analysis.hasConflicts) {
+                analysis.status = 'danger';
+            } else if (analysis.hasSynergies) {
+                analysis.status = 'synergy';
+            } else if (newNode.mechanic.risk_color === 'medium') {
+                analysis.status = 'warning';
+            } else {
+                analysis.status = 'safe';
+            }
+            
+            return analysis;
+        }
+
+        function sandboxAnalyzeCompatibility(mechA, mechB) {
+            let score = 5; // Нейтральная база
+            let reason = '';
+            
+            // Проверка рисков
+            if (mechA.risk_color === 'high' && mechB.risk_color === 'high') {
+                score -= 3;
+                reason = 'Две высокорисковые механики';
+            }
+            
+            // Проверка слоев
+            if (mechA.layer === mechB.layer) {
+                score += 2;
+                reason = 'Механики одного слоя';
+            }
+            
+            // Специфические синергии
+            if ((mechA.id === 'progression_system' && mechB.id === 'daily_quests') ||
+                (mechB.id === 'progression_system' && mechA.id === 'daily_quests')) {
+                score += 3;
+                reason = 'Отличная синергия: прогрессия + ежедневные задания';
+            }
+            
+            // Специфические конфликты
+            if ((mechA.id === 'lootboxes' && mechB.id === 'progression_system') ||
+                (mechB.id === 'lootboxes' && mechA.id === 'progression_system')) {
+                score -= 3;
+                reason = 'Конфликт: лутбоксы могут обесценить прогрессию';
+            }
+            
+            return { score: Math.max(1, Math.min(10, score)), reason };
+        }
+
+        function sandboxRenderCanvas() {
+            const canvas = document.getElementById('sandboxCanvas');
+            const emptyState = document.getElementById('canvasEmptyState');
+            
+            if (!canvas) return;
+            
+            if (sandboxMechanics.length === 0) {
+                if (emptyState) emptyState.style.display = 'block';
+                canvas.innerHTML = '';
+                return;
+            }
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            // Очищаем холст
+            canvas.innerHTML = '';
+            
+            // Рисуем связи
+            sandboxRenderConnections();
+            
+            // Рисуем узлы
+            sandboxMechanics.forEach(node => {
+                sandboxCreateNodeElement(node);
+            });
+        }
+
+        function sandboxCreateNodeElement(node) {
+            const canvas = document.getElementById('sandboxCanvas');
+            if (!canvas) return;
+            
+            const element = document.createElement('div');
+            element.className = `sandbox-node node-${node.analysis.status}`;
+            element.style.left = `${node.position.x}px`;
+            element.style.top = `${node.position.y}px`;
+            element.setAttribute('data-id', node.id);
+            
+            const mechanic = node.mechanic;
+            const layerName = LAYER_NAMES[mechanic.layer] || mechanic.layer;
+            
+            element.innerHTML = `
+                <div class="sandbox-node-header">
+                    <div class="sandbox-node-name" title="${mechanic.name}">
+                        ${mechanic.name}
+                    </div>
+                    <button class="sandbox-node-remove" onclick="event.stopPropagation(); sandboxRemoveNode('${node.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                    ${mechanic.description.substring(0, 50)}...
+                </div>
+                <div class="sandbox-node-meta">
+                    <span class="node-badge layer-badge" style="font-size: 0.6875rem;">
+                        ${layerName}
+                    </span>
+                    <span class="node-badge risk-badge risk-${mechanic.risk_color}" style="font-size: 0.6875rem;">
+                        ${getRiskText(mechanic.risk_color)}
+                    </span>
+                </div>
+            `;
+            
+            // Обработчики событий
+            element.addEventListener('mousedown', sandboxStartDrag);
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sandboxSelectNode(node.id);
+            });
+            
+            canvas.appendChild(element);
+        }
+
+        function sandboxStartDrag(e) {
+            const nodeElement = e.target.closest('.sandbox-node');
+            if (!nodeElement) return;
+            
+            const nodeId = nodeElement.getAttribute('data-id');
+            const node = sandboxMechanics.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            isDragging = true;
+            selectedNodeId = nodeId;
+            
+            const rect = nodeElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', sandboxDragNode);
+            document.addEventListener('mouseup', sandboxStopDrag);
+            
+            e.preventDefault();
+        }
+
+        function sandboxDragNode(e) {
+            if (!isDragging || !selectedNodeId) return;
+            
+            const node = sandboxMechanics.find(n => n.id === selectedNodeId);
+            if (!node) return;
+            
+            const canvas = document.getElementById('sandboxCanvas');
+            if (!canvas) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            
+            let x = e.clientX - rect.left - dragOffset.x;
+            let y = e.clientY - rect.top - dragOffset.y;
+            
+            x = Math.max(0, Math.min(x, rect.width - node.size.width));
+            y = Math.max(0, Math.min(y, rect.height - node.size.height));
+            
+            node.position = { x, y };
+            
+            const nodeElement = document.querySelector(`[data-id="${selectedNodeId}"]`);
+            if (nodeElement) {
+                nodeElement.style.left = `${x}px`;
+                nodeElement.style.top = `${y}px`;
+            }
+            
+            // ОБНОВЛЯЕМ АНАЛИЗ при перемещении
+            requestIdleCallback(() => {
+                sandboxUpdateAllAnalysis();
+                sandboxRenderConnections();
+            });
+        }
+
+        function sandboxStopDrag() {
+            if (isDragging) {
+                isDragging = false;
+                sandboxSaveState();
+                document.removeEventListener('mousemove', sandboxDragNode);
+                document.removeEventListener('mouseup', sandboxStopDrag);
+            }
+        }
+
+        function sandboxSelectNode(nodeId) {
+            selectedNodeId = nodeId;
+        }
+
+        function sandboxRenderConnections() {
+            const canvas = document.getElementById('sandboxCanvas');
+            if (!canvas) return;
+            
+            // Удаляем старые связи
+            const oldSvg = canvas.querySelector('svg');
+            if (oldSvg) oldSvg.remove();
+            
+            if (sandboxConnections.length === 0) return;
+            
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.pointerEvents = 'none';
+            svg.style.zIndex = '5';
+            
+            sandboxConnections.forEach(connection => {
+                const fromNode = sandboxMechanics.find(n => n.id === connection.from);
+                const toNode = sandboxMechanics.find(n => n.id === connection.to);
+                
+                if (!fromNode || !toNode) return;
+                
+                const fromX = fromNode.position.x + fromNode.size.width / 2;
+                const fromY = fromNode.position.y + fromNode.size.height / 2;
+                const toX = toNode.position.x + toNode.size.width / 2;
+                const toY = toNode.position.y + toNode.size.height / 2;
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromX);
+                line.setAttribute('y1', fromY);
+                line.setAttribute('x2', toX);
+                line.setAttribute('y2', toY);
+                line.setAttribute('class', `connection-${connection.type}`);
+                
+                svg.appendChild(line);
+            });
+            
+            canvas.appendChild(svg);
+        }
+
+        function sandboxCreateSmartConnection() {
+            if (!selectedNodeId) {
+                showNotification('Выберите узел для создания связи', 'warning');
+                return;
+            }
+            
+            const fromNode = sandboxMechanics.find(n => n.id === selectedNodeId);
+            if (!fromNode) return;
+            
+            // Находим ближайший узел
+            let closestNode = null;
+            let closestDistance = Infinity;
+            
+            sandboxMechanics.forEach(node => {
+                if (node.id === selectedNodeId) return;
+                
+                const dx = node.position.x - fromNode.position.x;
+                const dy = node.position.y - fromNode.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < closestDistance && distance < 300) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            });
+            
+            if (closestNode) {
+                // Анализируем совместимость
+                const compatibility = sandboxAnalyzeCompatibility(fromNode.mechanic, closestNode.mechanic);
+                
+                // Проверяем, нет ли уже связи
+                const existingConnection = sandboxConnections.find(conn => 
+                    (conn.from === selectedNodeId && conn.to === closestNode.id) ||
+                    (conn.from === closestNode.id && conn.to === selectedNodeId)
+                );
+                
+                if (!existingConnection) {
+                    // Определяем тип связи на основе совместимости
+                    let type = 'weak';
+                    if (compatibility.score >= 7) type = 'synergy';
+                    else if (compatibility.score <= 3) type = 'conflict';
+                    else if (compatibility.score >= 5) type = 'strong';
+                    
+                    const connection = {
+                        id: `conn_${Date.now()}`,
+                        from: selectedNodeId,
+                        to: closestNode.id,
+                        type: type,
+                        compatibility: compatibility.score
+                    };
+                    
+                    sandboxConnections.push(connection);
+                    sandboxSaveState();
+                    sandboxRenderCanvas();
+                    sandboxUpdateAdvicePanel();
+                    
+                    let message = `Создана связь: ${fromNode.mechanic.name} → ${closestNode.mechanic.name}`;
+                    if (type === 'synergy') {
+                        message += ` ✨ Отличная синергия!`;
+                    } else if (type === 'conflict') {
+                        message += ` ⚠️ Обнаружен конфликт`;
+                    }
+                    
+                    showNotification(message, type === 'conflict' ? 'warning' : 'info');
+                } else {
+                    showNotification('Связь уже существует', 'warning');
+                }
+            } else {
+                showNotification('Рядом нет других механик для связи', 'warning');
+            }
+        }
+
+        function sandboxUpdateAllAnalysis() {
+            // Переанализируем все механики
+            sandboxMechanics.forEach(node => {
+                const analysis = sandboxAnalyzeNewMechanic(node);
+                node.analysis = analysis;
+            });
+            
+            sandboxRenderCanvas();
+            sandboxUpdateAdvicePanel();
+        }
+
+        function sandboxUpdateAdvicePanel() {
+            // Обновляем счетчики
+            document.getElementById('sandboxMechanicsCount').textContent = sandboxMechanics.length;
+            document.getElementById('sandboxConnectionsCount').textContent = sandboxConnections.length;
+            
+            // Считаем конфликты и синергии
+            let conflicts = 0;
+            let synergies = 0;
+            
+            sandboxMechanics.forEach(node => {
+                if (node.analysis.hasConflicts) conflicts++;
+                if (node.analysis.hasSynergies) synergies++;
+            });
+            
+            document.getElementById('sandboxConflictsCount').textContent = conflicts;
+            document.getElementById('sandboxSynergiesCount').textContent = synergies;
+            
+            // Обновляем общий балл системы
+            const totalScore = sandboxCalculateSystemScore();
+            const scoreElement = document.getElementById('systemScore');
+            scoreElement.textContent = `${totalScore}%`;
+            scoreElement.style.color = totalScore >= 70 ? 'var(--color-safe)' : 
+                                      totalScore >= 40 ? 'var(--color-warning)' : 
+                                      'var(--color-danger)';
+            
+            // Обновляем советы
+            sandboxUpdateAdviceItems();
+        }
+
+        function sandboxCalculateSystemScore() {
+            if (sandboxMechanics.length === 0) return 100;
+            
+            let score = 100;
+            
+            // Штраф за высокорисковые механики
+            const highRiskCount = sandboxMechanics.filter(n => n.mechanic.risk_color === 'high').length;
+            score -= highRiskCount * 15;
+            
+            // Штраф за конфликты
+            const conflictCount = sandboxMechanics.filter(n => n.analysis.hasConflicts).length;
+            score -= conflictCount * 20;
+            
+            // Бонус за синергии
+            const synergyCount = sandboxMechanics.filter(n => n.analysis.hasSynergies).length;
+            score += synergyCount * 10;
+            
+            // Бонус за баланс слоев
+            const layers = new Set(sandboxMechanics.map(n => n.mechanic.layer)).size;
+            if (layers >= 3) score += 15;
+            
+            return Math.max(0, Math.min(100, Math.round(score)));
+        }
+
+        function sandboxUpdateAdviceItems() {
+            const container = document.getElementById('adviceItems');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (sandboxMechanics.length === 0) {
+                container.innerHTML = `
+                    <div class="advice-item positive">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Добро пожаловать!</strong> Начните добавлять механики для анализа
+                    </div>
+                `;
+                return;
+            }
+            
+            const adviceItems = [];
+            
+            // Проверка на высокорисковые механики
+            const highRisk = sandboxMechanics.filter(n => n.mechanic.risk_color === 'high');
+            if (highRisk.length >= 2) {
+                adviceItems.push({
+                    type: 'danger',
+                    icon: 'fa-exclamation-triangle',
+                    title: 'Высокие риски!',
+                    message: `${highRisk.length} высокорисковых механики могут привести к проблемам`
+                });
+            }
+            
+            // Поиск конфликтов
+            sandboxMechanics.forEach(node => {
+                if (node.analysis.hasConflicts) {
+                    node.analysis.conflicts.forEach(conflict => {
+                        adviceItems.push({
+                            type: 'warning',
+                            icon: 'fa-exclamation-circle',
+                            title: 'Конфликт обнаружен',
+                            message: `"${node.mechanic.name}" конфликтует с "${conflict.with}": ${conflict.reason}`
+                        });
+                    });
+                }
+            });
+            
+            // Поиск синергий
+            sandboxMechanics.forEach(node => {
+                if (node.analysis.hasSynergies) {
+                    node.analysis.synergies.forEach(synergy => {
+                        adviceItems.push({
+                            type: 'positive',
+                            icon: 'fa-star',
+                            title: 'Отличная синергия!',
+                            message: `"${node.mechanic.name}" хорошо сочетается с "${synergy.with}": ${synergy.reason}`
+                        });
+                    });
+                }
+            });
+            
+            // Проверка баланса слоев
+            const layers = new Set(sandboxMechanics.map(n => n.mechanic.layer));
+            if (layers.size < 2 && sandboxMechanics.length >= 3) {
+                adviceItems.push({
+                    type: 'suggestion',
+                    icon: 'fa-plus-circle',
+                    title: 'Добавьте разнообразия',
+                    message: `Используются механики только ${layers.size} слоя. Добавьте другие слои для лучшего баланса`
+                });
+            }
+            
+            // Рекомендация по связям
+            if (sandboxMechanics.length >= 2 && sandboxConnections.length === 0) {
+                adviceItems.push({
+                    type: 'suggestion',
+                    icon: 'fa-link',
+                    title: 'Создайте связи',
+                    message: 'Используйте "Умную связь" для соединения механик. Нажмите на узел, затем на кнопку связи'
+                });
+            }
+            
+            // Если нет советов - показываем позитивный
+            if (adviceItems.length === 0) {
+                adviceItems.push({
+                    type: 'positive',
+                    icon: 'fa-thumbs-up',
+                    title: 'Отличная работа!',
+                    message: 'Система хорошо сбалансирована. Продолжайте в том же духе!'
+                });
+            }
+            
+            // Ограничиваем количество советов
+            const displayItems = adviceItems.slice(0, 5);
+            
+            // Рендерим советы
+            displayItems.forEach(advice => {
+                const item = document.createElement('div');
+                item.className = `advice-item ${advice.type}`;
+                item.innerHTML = `
+                    <i class="fas ${advice.icon}"></i>
+                    <strong>${advice.title}</strong> ${advice.message}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function sandboxRemoveNode(nodeId) {
+            sandboxMechanics = sandboxMechanics.filter(node => node.id !== nodeId);
+            sandboxConnections = sandboxConnections.filter(conn => 
+                conn.from !== nodeId && conn.to !== nodeId
+            );
+            
+            if (selectedNodeId === nodeId) {
+                selectedNodeId = null;
+            }
+            
+            sandboxSaveState();
+            sandboxRenderCanvas();
+            sandboxUpdateAdvicePanel();
+            showNotification('Механика удалена', 'info');
+        }
+
+        function sandboxAutoArrangeMechanics() {
+            if (sandboxMechanics.length === 0) return;
+            
+            const canvas = document.getElementById('sandboxCanvas');
+            if (!canvas) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Круговая расстановка
+            const radius = Math.min(rect.width, rect.height) * 0.3;
+            const angleStep = (2 * Math.PI) / sandboxMechanics.length;
+            
+            sandboxMechanics.forEach((node, index) => {
+                const angle = index * angleStep;
+                node.position.x = centerX + Math.cos(angle) * radius - node.size.width / 2;
+                node.position.y = centerY + Math.sin(angle) * radius - node.size.height / 2;
+            });
+            
+            sandboxSaveState();
+            sandboxRenderCanvas();
+            sandboxUpdateAllAnalysis();
+            showNotification('Механики упорядочены', 'info');
+        }
+
+        function sandboxClearSandbox() {
+            if (confirm('Очистить всю песочницу? Все механики и связи будут удалены.')) {
+                sandboxMechanics = [];
+                sandboxConnections = [];
+                selectedNodeId = null;
+                sandboxSaveState();
+                sandboxRenderCanvas();
+                sandboxUpdateAdvicePanel();
+                showNotification('Песочница очищена', 'info');
+            }
+        }
+
+        function sandboxSaveState() {
+            localStorage.setItem('corelin_sandbox', JSON.stringify(sandboxMechanics));
+            localStorage.setItem('corelin_connections', JSON.stringify(sandboxConnections));
+        }
+
+        function sandboxExport() {
+            const system = {
+                name: prompt('Название системы:', 'Моя игровая система') || 'Моя система',
+                description: prompt('Описание:', '') || '',
+                mechanics: sandboxMechanics.map(node => ({
+                    id: node.mechanic.id,
+                    name: node.mechanic.name,
+                    layer: node.mechanic.layer,
+                    risk: node.mechanic.risk_color,
+                    position: node.position,
+                    analysis: node.analysis
+                })),
+                connections: sandboxConnections,
+                analysis: {
+                    score: sandboxCalculateSystemScore(),
+                    timestamp: new Date().toISOString()
+                },
+                exportDate: new Date().toISOString(),
+                exportedFrom: 'CoreLIN Smart Sandbox v0.3'
+            };
+            
+            const blob = new Blob([JSON.stringify(system, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `corelin_system_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Система экспортирована в JSON', 'info');
+        }
+
+        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+        function searchMechanic(id) {
+            const mechanic = mechanicsDatabase.find(m => m.id === id);
+            if (!mechanic) return;
+            
+            document.getElementById('layerFilter').value = mechanic.layer;
+            document.getElementById('searchInput').value = mechanic.name;
+            
+            applyFilters();
+            
+            setTimeout(() => {
+                toggleCard(id);
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        function copyMechanicToClipboard(id) {
+            const mechanic = mechanicsDatabase.find(m => m.id === id);
+            if (!mechanic) return;
+            
+            const text = `
+${mechanic.name.toUpperCase()}
+${'='.repeat(mechanic.name.length)}
+
+ID: ${mechanic.id}
+Слой: ${LAYER_NAMES[mechanic.layer] || mechanic.layer}
+Риск: ${getRiskText(mechanic.risk_color)}
+Токсичность: ${mechanic.toxicity_level || 'Не указана'}
+
+📝 ОПИСАНИЕ:
+${mechanic.description}
+
+🎯 МОТИВАЦИЯ:
+${mechanic.motivation?.notes || 'Нет описания'}
+
+🎮 ПРИМЕРЫ В ИГРАХ:
+${mechanic.game_examples ? mechanic.game_examples.map(ex => `• ${ex.title || 'Пример'}: ${ex.implementation || ex.details || ''}`).join('\n') : 'Не указаны'}
+
+⚠️ РИСКИ ЗЛОУПОТРЕБЛЕНИЯ:
+${mechanic.abuse_risks ? mechanic.abuse_risks.map(risk => `• ${risk}`).join('\n') : 'Не указаны'}
+            `.trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Механика скопирована в буфер обмена!', 'info');
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                showNotification('Не удалось скопировать', 'error');
+            });
+        }
+
+        function saveCurrentFilter() {
+            const name = prompt('Введите название для фильтра:');
+            if (!name) return;
+            
+            const filter = {
+                name: name,
+                layer: document.getElementById('layerFilter').value,
+                search: document.getElementById('searchInput').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            savedFilters.unshift(filter);
+            localStorage.setItem('corelin_filters', JSON.stringify(savedFilters));
+            updateSavedFiltersList();
+            showNotification(`Фильтр "${name}" сохранен!`, 'info');
+        }
+
+        function updateSavedFiltersList() {
+            const list = document.getElementById('savedFiltersList');
+            if (!list) return;
+            
+            list.innerHTML = '';
+            
+            savedFilters.slice(0, 3).forEach((filter, index) => {
+                const item = document.createElement('div');
+                item.className = 'bookmark-item';
+                item.innerHTML = `
+                    <span class="bookmark-item-name">${filter.name}</span>
+                    <span style="font-size: 0.75rem; color: var(--color-text-lighter);">
+                        ${new Date(filter.timestamp).toLocaleDateString('ru-RU')}
+                    </span>
+                `;
+                
+                item.addEventListener('click', () => {
+                    loadFilter(index);
+                });
+                
+                list.appendChild(item);
+            });
+            
+            if (savedFilters.length === 0) {
+                list.innerHTML = '<p style="color: var(--color-text-lighter); font-size: 0.875rem; text-align: center; padding: 0.5rem;">Нет сохраненных фильтров</p>';
+            }
+        }
+
+        function loadFilter(index) {
+            if (index >= 0 && index < savedFilters.length) {
+                const filter = savedFilters[index];
+                document.getElementById('layerFilter').value = filter.layer;
+                document.getElementById('searchInput').value = filter.search || '';
+                applyFilters();
+                
+                document.querySelector('.content').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function saveCubeResultToBookmarks() {
+            if (!lastCubeResult || !lastCubeResult.mechanics) {
+                showNotification('Сначала сгенерируйте механику!', 'warning');
+                return;
+            }
+            
+            let added = 0;
+            lastCubeResult.mechanics.forEach(mechanic => {
+                if (!bookmarks.includes(mechanic.id)) {
+                    bookmarks.push(mechanic.id);
+                    added++;
+                }
+            });
+            
+            localStorage.setItem('corelin_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarksList();
+            
+            if (added > 0) {
+                showNotification(`Добавлено ${added} механик в закладки!`, 'info');
+            } else {
+                showNotification('Все эти механики уже были в закладках', 'info');
+            }
+        }
+
+        function createDesignChallenge() {
+            if (!lastCubeResult || !lastCubeResult.mechanics) {
+                showNotification('Сначала сгенерируйте механику!', 'warning');
+                return;
+            }
+            
+            const mechanics = lastCubeResult.mechanics;
+            const names = mechanics.map(m => m.name);
+            
+            const challenge = `
+🎯 ДИЗАЙН-ЧЕЛЛЕНДЖ CORE LIN
+=============================
+
+📋 СГЕНЕРИРОВАННЫЕ МЕХАНИКИ:
+${names.map((name, i) => `${i+1}. "${name}"`).join('\n')}
+
+📊 ПАРАМЕТРЫ:
+• Количество: ${mechanics.length} механик
+• Сложность: ${mechanics.length === 1 ? 'Базовый' : mechanics.length <= 2 ? 'Средний' : 'Продвинутый'}
+
+🎯 ЗАДАНИЕ:
+Спроектируйте систему, которая интегрирует все выпавшие механики в единую работающую систему.
+
+📝 ТРЕБОВАНИЯ:
+1. Опишите core loop системы
+2. Покажите взаимодействие механик
+3. Продумайте баланс
+4. Укажите потенциальные риски
+5. Предложите 2 варианта применения
+
+⏱ ВРЕМЯ: ${mechanics.length * 25} минут
+
+✨ УДАЧИ!
+            `.trim();
+            
+            navigator.clipboard.writeText(challenge).then(() => {
+                showNotification('Задача скопирована в буфер обмена!', 'info');
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                showNotification('Не удалось скопировать задачу', 'error');
+            });
+        }
+
+        function updateCubeHistory() {
+            const historyContainer = document.getElementById('cubeHistory');
+            if (!historyContainer) return;
+            
+            if (cubeHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <p style="text-align: center; padding: 1rem; color: var(--color-text-lighter); font-weight: 500; font-size: 0.875rem;">
+                        История генераций пуста
+                    </p>
+                `;
+                return;
+            }
+            
+            const historyHTML = cubeHistory.slice(0, 5).map((record, index) => {
+                const date = new Date(record.timestamp);
+                const timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+                
+                return `
+                    <div style="padding: 0.75rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 500; color: var(--color-text); font-size: 0.875rem;">${record.mechanics.map(m => m.name).join(', ')}</div>
+                            <div style="font-size: 0.75rem; color: var(--color-text-lighter);">${timeStr}</div>
+                        </div>
+                        <button onclick="event.stopPropagation(); loadCubeHistory(${index})" style="background: var(--color-accent); color: white; border: none; padding: 0.25rem 0.75rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.75rem; font-weight: 500;">
+                            Повторить
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            historyContainer.innerHTML = `
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${historyHTML}
+                </div>
+            `;
+        }
+
+        function loadCubeHistory(index) {
+            if (index >= 0 && index < cubeHistory.length) {
+                const record = cubeHistory[index];
+                const mechanics = record.mechanics.map(m => 
+                    mechanicsDatabase.find(mech => mech.id === m.id)
+                ).filter(m => m);
+                
+                lastCubeResult = {
+                    mechanics: mechanics,
+                    timestamp: record.timestamp,
+                    filters: {}
+                };
+                
+                showCubeResult(mechanics, 'success');
+                showNotification('Результат загружен из истории', 'info');
+            }
+        }
+
+        function exportDatabase() {
+            const data = {
+                mechanics: mechanicsDatabase,
+                bookmarks: bookmarks,
+                savedFilters: savedFilters,
+                cubeHistory: cubeHistory,
+                sandboxState: {
+                    mechanics: sandboxMechanics,
+                    connections: sandboxConnections
+                },
+                exportDate: new Date().toISOString(),
+                version: 'CoreLIN v0.3 с Умной Песочницей'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `corelin_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('База данных экспортирована', 'info');
+        }
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Инициализация CoreLIN v0.3 с Умной Песочницей');
+            
+            // Загружаем данные
+            await loadMechanicsDatabase();
+            
+            // Инициализируем сохраненные фильтры
+            updateSavedFiltersList();
+            
+            // Инициализируем куб
+            updateCubeFilterStats();
+            updateCubeHistory();
+            
+            showNotification('CoreLIN v0.3 загружен! Используйте "Умную песочницу" для анализа механик', 'info');
+        });
+    </script>
+</body>
+</html>
